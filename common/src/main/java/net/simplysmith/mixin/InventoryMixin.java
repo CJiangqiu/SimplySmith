@@ -5,7 +5,8 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
-import net.simplysmith.smith.AffixRoller;
+import net.simplysmith.smith.affix.AffixRoller;
+import net.simplysmith.smith.affix.FunctionalAffixEffects;
 import net.simplysmith.smith.SmithData;
 
 import org.spongepowered.asm.mixin.Final;
@@ -47,7 +48,10 @@ public abstract class InventoryMixin {
                 if (SmithData.canStamp(stack)) {
                     AffixRoller.stamp(stack, player.getRandom());
                 }
+                FunctionalAffixEffects.keepEternal(stack);
             }
         }
+
+        FunctionalAffixEffects.tickEquipment(player);
     }
 }

@@ -4,6 +4,9 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 
 import net.simplysmith.config.SimplySmithConfig;
+import net.simplysmith.smith.affix.Affix;
+import net.simplysmith.smith.affix.Affixes;
+import net.simplysmith.smith.quality.Quality;
 
 import java.util.ArrayList;
 import java.util.List;

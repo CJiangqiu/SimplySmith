@@ -9,7 +9,10 @@
   "mixins": [
     "AnvilMenuMixin",
     "InventoryMixin",
-    "ItemStackMixin"
+    "ItemStackMixin",
+    "LivingEntityMixin",
+    "PlayerAttackMixin",
+    "PlayerDeathMixin"
   ],
   "injectors": {
     "defaultRequire": 1

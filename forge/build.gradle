@@ -36,6 +36,9 @@ dependencies {
     // 可选客户端联动：只加入开发环境，不打包进成品
     modCompileOnly "me.shedaniel.cloth:cloth-config-forge:$rootProject.cloth_config_version"
     modLocalRuntime "me.shedaniel.cloth:cloth-config-forge:$rootProject.cloth_config_version"
+    modCompileOnly "mezz.jei:jei-$rootProject.minecraft_version-common-api:$rootProject.jei_version"
+    modCompileOnly "mezz.jei:jei-$rootProject.minecraft_version-forge-api:$rootProject.jei_version"
+    modLocalRuntime "mezz.jei:jei-$rootProject.minecraft_version-forge:$rootProject.jei_version"
 
     common(project(path: ':common', configuration: 'namedElements')) { transitive = false }
     shadowBundle project(path: ':common', configuration: 'transformProductionForge')

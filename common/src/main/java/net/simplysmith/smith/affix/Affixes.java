@@ -1,4 +1,4 @@
-package net.simplysmith.smith;
+package net.simplysmith.smith.affix;
 
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -47,12 +47,40 @@ public final class Affixes {
     // 幸运：幸运提升
     public static final Affix FORTUNE = register("fortune", Attributes.LUCK, AttributeModifier.Operation.ADDITION, 1.0D);
 
+    // 吸血：按实际造成的伤害恢复生命，满血时转为伤害吸收
+    public static final Affix LIFESTEAL = registerEffect("lifesteal", Affix.Kind.LIFESTEAL, 0.10D);
+
+    // 血怒：生命高于 1 点时消耗 1 点生命，增加本次近战伤害
+    public static final Affix BLOODRAGE = registerEffect("bloodrage", Affix.Kind.BLOODRAGE, 2.0D);
+
+    // 经验修补：消耗经验点修复装备耐久
+    public static final Affix EXPERIENCE_MENDING = registerEffect("experience_mending", Affix.Kind.EXPERIENCE_MENDING, 2.0D);
+
+    // 永恒：耐久始终保持满值
+    public static final Affix ETERNAL = registerEffect("eternal", Affix.Kind.ETERNAL, 0.0D);
+
+    // 破军：提升原版暴击后的伤害
+    public static final Affix BREAK_ARMY = registerEffect("break_army", Affix.Kind.BREAK_ARMY, 1.0D);
+
+    // 不朽：死亡时保留 1 点生命，基础数值为冷却减免秒数
+    public static final Affix IMMORTAL = registerEffect("immortal", Affix.Kind.IMMORTAL, 1.0D);
+
+    // 闪避：手持与穿戴装备的概率直接叠加
+    public static final Affix DODGE = registerEffect("dodge", Affix.Kind.DODGE, 0.10D);
+
     private Affixes() {
     }
 
     private static Affix register(String id, Attribute attribute,
                                   AttributeModifier.Operation operation, double defaultBaseValue) {
         Affix affix = new Affix(id, attribute, operation, defaultBaseValue);
+        BY_ID.put(id, affix);
+        ALL.add(affix);
+        return affix;
+    }
+
+    private static Affix registerEffect(String id, Affix.Kind kind, double defaultBaseValue) {
+        Affix affix = new Affix(id, kind, defaultBaseValue);
         BY_ID.put(id, affix);
         ALL.add(affix);
         return affix;

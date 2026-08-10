@@ -10,4 +10,7 @@ dependencies {
 
     // 仅用于编译可选配置页面，不会打包进 SimplySmith，也不是运行必需项
     modCompileOnly "me.shedaniel.cloth:cloth-config:$rootProject.cloth_config_version"
+
+    // 同上，仅用于编译可选的 JEI 插件
+    modCompileOnly "mezz.jei:jei-$rootProject.minecraft_version-common-api:$rootProject.jei_version"
 }

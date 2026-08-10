@@ -18,7 +18,9 @@ Initial quality is based on the item's vanilla rarity. Enchanted loot keeps vani
 | Mythic | 6–8 | ×7 |
 | Ultimate | 7–9 | ×10 |
 
-Affix values are calculated as `base value × quality multiplier × (1 + enhancement level)`. Each base value is also the increase from one enhancement level before the quality multiplier is applied.
+### Attribute affixes
+
+Attribute-affix values are calculated as `base value × quality multiplier × (1 + enhancement level)`. Each base value is also the increase from one enhancement level before the quality multiplier is applied.
 
 | Affix | Effect |
 |---|---|
@@ -32,18 +34,34 @@ Affix values are calculated as `base value × quality multiplier × (1 + enhance
 | Impact | +0.1 Attack Knockback |
 | Fortune | +1 Luck |
 
+### Functional affixes
+
+| Affix | Base value | Effect |
+|---|---:|---|
+| Lifesteal | 10% | Restore this percentage of actual damage dealt. Healing beyond full health becomes absorption. |
+| Bloodrage | +2 | Above 1 health, spend 1 health on a melee attack to add this damage. |
+| Experience Mending | 2 | For each held or equipped damaged item, consume 1 experience point per tick to restore this much durability. |
+| Eternal | — | Durability is always kept full. |
+| Break Army | +100% | Increase vanilla critical-hit damage by this percentage. |
+| Immortal | -1 s | On death, remain at 1 health. Cooldown is 60 seconds minus this value, with a minimum of 1 second. Uses Minecraft's normal item cooldown. |
+| Dodge | 10% | Values from both hands and all worn armor add together; incoming damage is cancelled on success, capped at 99%. |
+
 Two related items are also added. Both can be found in the Ingredients creative tab:
 
 - **Enhancement Stone**: combine it with stamped equipment in an anvil to increase every affix on the item. Enhancement has no level cap and costs no experience.
 - **Breakthrough Stone**: combine it with stamped equipment in an anvil to raise its quality by one tier and fill the new affix slots. Ultimate equipment cannot be raised further.
 
-[Cloth Config API](https://modrinth.com/mod/cloth-config) and [Mod Menu](https://modrinth.com/mod/modmenu) are optional. SimplySmith works without them; on Fabric, installing both adds an in-game configuration screen. On Forge, Cloth Config API alone adds the same screen.
+Compatible Mods:
+
+- [Cloth Config API](https://modrinth.com/mod/cloth-config)
+- [Mod Menu](https://modrinth.com/mod/modmenu)
+- [JEI](https://modrinth.com/mod/jei)
 
 ---
 
 # SimplySmith
 
-SimplySmith 添加装备品质、随机词条、强化和品质突破。
+SimplySmith 添加了装备品质、随机词条、强化和品质突破。
 
 ## 玩法
 
@@ -61,7 +79,9 @@ SimplySmith 添加装备品质、随机词条、强化和品质突破。
 | 神话 | 6–8 | ×7 |
 | 究极 | 7–9 | ×10 |
 
-词条的实际数值为 `基础值 × 品质倍率 × (1 + 强化等级)`。基础值就是每提升一级强化后的增量，两者都会受到品质倍率影响。
+### 属性词条
+
+属性词条的实际数值为 `基础值 × 品质倍率 × (1 + 强化等级)`。基础值就是每提升一级强化后的增量，两者都会受到品质倍率影响。
 
 | 词条 | 效果 |
 |---|---|
@@ -75,9 +95,25 @@ SimplySmith 添加装备品质、随机词条、强化和品质突破。
 | 冲击 | 攻击击退 +0.1 |
 | 幸运 | 幸运 +1 |
 
+### 功能词条
+
+| 词条 | 基础值 | 效果 |
+|---|---:|---|
+| 吸血 | 10% | 攻击造成实际伤害时，恢复该比例生命；治疗溢出转化为伤害吸收。 |
+| 血怒 | +2 | 生命高于 1 点时，近战攻击消耗 1 点生命并额外造成该伤害。 |
+| 经验修补 | 2 | 每件被手持或穿戴、且耐久未满的装备，每 tick 消耗 1 点经验并恢复该耐久。 |
+| 永恒 | — | 耐久始终保持满值。 |
+| 破军 | +100% | 原版暴击伤害额外提升该百分比。 |
+| 不朽 | -1 秒 | 死亡时保留 1 点生命；冷却为 60 秒减去该数值，最低 1 秒，使用原版同类物品共享冷却。 |
+| 闪避 | 10% | 主手、副手与全部穿戴装备的数值直接相加；成功时取消本次伤害，最高 99%。 |
+
 新增了两种相关物品，均可在创造模式的原材料栏中找到：
 
 - **强化石**：在铁砧中与已生成品质的装备合成，提升装备上的全部词条。强化等级没有上限，也不消耗经验。
 - **突破石**：在铁砧中与已生成品质的装备合成，将品质提升一档，并补齐新品质增加的词条槽位。品质到顶后无法继续突破。
 
-[Cloth Config API](https://modrinth.com/mod/cloth-config) 和 [Mod Menu](https://modrinth.com/mod/modmenu) 都是可选项，不安装也不会影响 SimplySmith 正常运行。Fabric 安装这两个 Mod 后可在游戏内打开配置页面；Forge 只需安装 Cloth Config API 即可。
+兼容 Mod：
+
+- [Cloth Config API](https://modrinth.com/mod/cloth-config)
+- [Mod Menu](https://modrinth.com/mod/modmenu)
+- [JEI](https://modrinth.com/mod/jei)

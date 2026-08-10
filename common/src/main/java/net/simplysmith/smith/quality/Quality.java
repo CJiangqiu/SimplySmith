@@ -1,4 +1,4 @@
-package net.simplysmith.smith;
+package net.simplysmith.smith.quality;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.world.item.Rarity;

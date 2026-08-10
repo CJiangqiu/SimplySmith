@@ -3,21 +3,18 @@ package net.simplysmith.mixin;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
-import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.util.RandomSource;
+import net.minecraft.server.level.ServerPlayer;
 
-import net.simplysmith.SimplySmith;
-import net.simplysmith.smith.Affix;
-import net.simplysmith.smith.Quality;
-import net.simplysmith.smith.QualityText;
+import net.simplysmith.smith.affix.Affix;
+import net.simplysmith.smith.affix.Affixes;
+import net.simplysmith.smith.affix.FunctionalAffixEffects;
+import net.simplysmith.smith.quality.Quality;
 import net.simplysmith.smith.SmithData;
 
 import org.spongepowered.asm.mixin.Mixin;
@@ -29,6 +26,17 @@ import java.util.List;
 
 @Mixin(ItemStack.class)
 public abstract class ItemStackMixin {
+
+    /* 永恒不只阻止本次耐久扣除，同时将已有损伤归零，确保物品始终满耐久。 */
+    @Inject(method = "hurt", at = @At("HEAD"), cancellable = true)
+    private void simplysmith$keepEternalItemPristine(int amount, RandomSource random, ServerPlayer player,
+                                                      CallbackInfoReturnable<Boolean> cir) {
+        ItemStack stack = (ItemStack) (Object) this;
+        if (FunctionalAffixEffects.has(stack, Affixes.ETERNAL)) {
+            stack.setDamageValue(0);
+            cir.setReturnValue(false);
+        }
+    }
 
     /*
     把词条的属性加成并入物品自身的属性修饰符
@@ -60,7 +68,9 @@ public abstract class ItemStackMixin {
         */
         Multimap<Attribute, AttributeModifier> modifiers = HashMultimap.create(cir.getReturnValue());
         for (Affix affix : affixes) {
-            modifiers.put(affix.attribute(), affix.createModifier(slot, quality, level));
+            if (affix.isAttribute()) {
+                modifiers.put(affix.attribute(), affix.createModifier(slot, quality, level));
+            }
         }
         cir.setReturnValue(modifiers);
     }
@@ -78,40 +88,6 @@ public abstract class ItemStackMixin {
         ItemStack stack = (ItemStack) (Object) this;
         if (SmithData.isStamped(stack)) {
             cir.setReturnValue(SmithData.quality(stack).vanillaRarity());
-        }
-    }
-
-    /*
-    在 Tooltip 里追加品质、强化等级与词条，插在物品名之后
-    */
-    @Inject(method = "getTooltipLines", at = @At("RETURN"))
-    private void simplysmith$appendTooltip(Player player, TooltipFlag flag, CallbackInfoReturnable<List<Component>> cir) {
-        ItemStack stack = (ItemStack) (Object) this;
-        if (!SmithData.isStamped(stack)) {
-            return;
-        }
-
-        List<Component> lines = cir.getReturnValue();
-        Quality quality = SmithData.quality(stack);
-
-        int index = Math.min(1, lines.size());
-
-        MutableComponent qualityLine = Component.translatable("tooltip." + SimplySmith.MOD_ID + ".quality")
-                .withStyle(ChatFormatting.GRAY)
-                .append(QualityText.apply(quality,
-                        Component.translatable("quality." + SimplySmith.MOD_ID + "." + quality.id())));
-        lines.add(index, qualityLine);
-
-        int level = SmithData.level(stack);
-        if (level > 0) {
-            index++;
-            lines.add(index, Component.translatable("tooltip." + SimplySmith.MOD_ID + ".level", level)
-                    .withStyle(ChatFormatting.GOLD));
-        }
-
-        for (Affix affix : SmithData.affixes(stack)) {
-            index++;
-            lines.add(index, Component.translatable(affix.translationKey()).withStyle(ChatFormatting.BLUE));
         }
     }
 }

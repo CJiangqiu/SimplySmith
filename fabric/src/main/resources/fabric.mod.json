@@ -19,6 +19,9 @@
     ],
     "modmenu": [
       "net.simplysmith.fabric.client.SimplySmithModMenu"
+    ],
+    "jei_mod_plugin": [
+      "net.simplysmith.client.jei.SimplySmithJeiPlugin"
     ]
   },
   "mixins": [
@@ -26,12 +29,13 @@
   ],
   "depends": {
     "fabricloader": ">=0.19.3",
-    "minecraft": "~1.20.1",
+    "minecraft": "=1.20.1",
     "java": ">=17",
     "fabric-api": "*"
   },
   "suggests": {
     "cloth-config": "*",
-    "modmenu": "*"
+    "modmenu": "*",
+    "jei": "*"
   }
 }

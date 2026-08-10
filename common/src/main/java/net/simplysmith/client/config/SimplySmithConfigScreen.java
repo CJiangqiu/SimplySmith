@@ -5,9 +5,9 @@ import net.minecraft.network.chat.Component;
 
 import net.simplysmith.SimplySmith;
 import net.simplysmith.config.SimplySmithConfig;
-import net.simplysmith.smith.Affix;
-import net.simplysmith.smith.Affixes;
-import net.simplysmith.smith.Quality;
+import net.simplysmith.smith.affix.Affix;
+import net.simplysmith.smith.affix.Affixes;
+import net.simplysmith.smith.quality.Quality;
 
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;

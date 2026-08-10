@@ -1,4 +1,4 @@
-package net.simplysmith.smith;
+package net.simplysmith.smith.affix;
 
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -6,6 +6,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 
 import net.simplysmith.SimplySmith;
 import net.simplysmith.config.SimplySmithConfig;
+import net.simplysmith.smith.quality.Quality;
 
 import java.nio.charset.StandardCharsets;
 import java.util.EnumMap;
@@ -17,7 +18,19 @@ import java.util.UUID;
 */
 public final class Affix {
 
+    public enum Kind {
+        ATTRIBUTE,
+        LIFESTEAL,
+        BLOODRAGE,
+        EXPERIENCE_MENDING,
+        ETERNAL,
+        BREAK_ARMY,
+        IMMORTAL,
+        DODGE
+    }
+
     private final String id;
+    private final Kind kind;
     private final Attribute attribute;
     private final AttributeModifier.Operation operation;
     private final double defaultBaseValue;
@@ -32,7 +45,16 @@ public final class Affix {
     private final Map<EquipmentSlot, UUID> modifierIds = new EnumMap<>(EquipmentSlot.class);
 
     Affix(String id, Attribute attribute, AttributeModifier.Operation operation, double defaultBaseValue) {
+        this(id, Kind.ATTRIBUTE, attribute, operation, defaultBaseValue);
+    }
+
+    Affix(String id, Kind kind, double defaultBaseValue) {
+        this(id, kind, null, null, defaultBaseValue);
+    }
+
+    private Affix(String id, Kind kind, Attribute attribute, AttributeModifier.Operation operation, double defaultBaseValue) {
         this.id = id;
+        this.kind = kind;
         this.attribute = attribute;
         this.operation = operation;
         this.defaultBaseValue = defaultBaseValue;
@@ -46,6 +68,14 @@ public final class Affix {
     // NBT、配置键、语言文件键共用的稳定标识
     public String id() {
         return id;
+    }
+
+    public Kind kind() {
+        return kind;
+    }
+
+    public boolean isAttribute() {
+        return kind == Kind.ATTRIBUTE;
     }
 
     public Attribute attribute() {
@@ -87,5 +117,16 @@ public final class Affix {
 
     public String translationKey() {
         return "affix." + SimplySmith.MOD_ID + "." + id;
+    }
+
+    /*
+    效果描述的翻译键，按住 Shift 时显示在词条名下方
+
+    对应的语言文本用 %s 接收实时数值，例如「增加 %s 点攻击伤害」。
+    描述由每条词条各自撰写，功能型词条可以在这里讲清自己的机制；
+    没有数值可讲的词条把 %s 省掉即可，多余的参数不会被展开。
+    */
+    public String descriptionKey() {
+        return translationKey() + ".desc";
     }
 }

@@ -1,10 +1,10 @@
 package net.simplysmith.config;
 
 import net.simplysmith.SimplySmith;
-import net.simplysmith.smith.Affix;
-import net.simplysmith.smith.Affixes;
+import net.simplysmith.smith.affix.Affix;
+import net.simplysmith.smith.affix.Affixes;
 import net.simplysmith.platform.PlatformBridge;
-import net.simplysmith.smith.Quality;
+import net.simplysmith.smith.quality.Quality;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -198,9 +198,9 @@ public final class SimplySmithConfig {
         sb.append('\n');
 
         sb.append("#Base value of each affix at Common quality.\n");
-        sb.append("#Note: nimble is a percentage bonus, 0.1 means +10%; all others are flat bonuses.\n");
+        sb.append("#Note: nimble, lifesteal, break_army and dodge are percentages: 0.1 means 10%.\n");
         sb.append("#各词条在「普通」品质下的基础数值。\n");
-        sb.append("#注意：nimble（轻盈）是百分比加成，0.1 表示 +10%；其余均为固定数值加成。\n");
+        sb.append("#注意：nimble（轻盈）、lifesteal（吸血）、break_army（破军）和 dodge（闪避）是百分比，0.1 表示 10%。\n");
         sb.append('[').append(SECTION_AFFIX_BASE).append("]\n");
         for (Affix affix : Affixes.all()) {
             sb.append(affix.id()).append(" = ")
