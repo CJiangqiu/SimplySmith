@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +47,7 @@ public final class Toml {
             if (eq < 0) {
                 continue;
             }
-            String key = line.substring(0, eq).trim();
+            String key = unquote(line.substring(0, eq).trim());
             String value = stripInlineComment(line.substring(eq + 1).trim());
             if (key.isEmpty()) {
                 continue;
@@ -54,6 +55,41 @@ public final class Toml {
             toml.values.put(section.isEmpty() ? key : section + "." + key, value);
         }
         return toml;
+    }
+
+    /*
+    去掉键上的引号
+
+    带命名空间的词条 id 含冒号，而 TOML 的裸键不允许冒号，只能写成 "othermod:deadly"。
+    存进表里时统一去引号，调用方拿 id 原文查即可。
+    */
+    private static String unquote(String key) {
+        if (key.length() >= 2 && key.charAt(0) == '"' && key.charAt(key.length() - 1) == '"') {
+            return key.substring(1, key.length() - 1);
+        }
+        return key;
+    }
+
+    // 写出时的反向操作：含冒号的键必须加引号才是合法 TOML
+    public static String quoteIfNeeded(String key) {
+        return key.indexOf(':') < 0 ? key : '"' + key + '"';
+    }
+
+    /*
+    列出某个段落下的全部键名，顺序与文件中一致
+
+    用于把配置文件里我方当前不认识的键原样留住：数据包词条要到进世界才加载，
+    启动时重写配置若只写已知词条，用户为数据包词条调过的值会被静默删掉。
+    */
+    public List<String> keysIn(String section) {
+        String prefix = section + ".";
+        List<String> keys = new ArrayList<>();
+        for (String full : values.keySet()) {
+            if (full.startsWith(prefix)) {
+                keys.add(full.substring(prefix.length()));
+            }
+        }
+        return keys;
     }
 
     // 只在引号外的 # 处截断，避免把字符串里的井号当注释

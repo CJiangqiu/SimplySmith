@@ -104,12 +104,17 @@ public final class SimplySmithConfigScreen {
         ConfigCategory category = builder.getOrCreateCategory(
                 Component.translatable("config.simplysmith.category.affix_base"));
 
+        /*
+        没进世界时数据包词条尚未加载，这里只列得出内置的那些。
+        它们在配置文件中的条目不会因此丢失，重写时会被原样保留。
+        */
         for (Affix affix : Affixes.all()) {
-            double currentValue = config.affixBaseValue(affix.id(), affix.defaultBaseValue());
-            affixBaseValues.put(affix.id(), currentValue);
+            String key = affix.configKey();
+            double currentValue = config.affixBaseValue(key, affix.defaultBaseValue());
+            affixBaseValues.put(key, currentValue);
             category.addEntry(entries.startDoubleField(Component.translatable(affix.translationKey()), currentValue)
                     .setDefaultValue(affix.defaultBaseValue())
-                    .setSaveConsumer(value -> affixBaseValues.put(affix.id(), value))
+                    .setSaveConsumer(value -> affixBaseValues.put(key, value))
                     .build());
         }
     }

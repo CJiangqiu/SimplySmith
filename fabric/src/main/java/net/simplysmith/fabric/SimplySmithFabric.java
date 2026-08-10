@@ -2,8 +2,10 @@ package net.simplysmith.fabric;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
+import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.loader.api.FabricLoader;
 
+import net.minecraft.server.packs.PackType;
 import net.minecraft.world.item.CreativeModeTabs;
 
 import net.simplysmith.SimplySmith;
@@ -19,7 +21,14 @@ public final class SimplySmithFabric implements ModInitializer {
         PlatformBridge.init(FabricLoader.getInstance().getConfigDir());
         SmithItems.register(new FabricItemRegistrar());
         addToCreativeTab();
+        registerAffixLoader();
+        FabricAffixNetwork.register();
         SimplySmith.init();
+    }
+
+    // 挂在数据包一侧，随世界加载与 /reload 一起重跑
+    private static void registerAffixLoader() {
+        ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(new FabricAffixDataLoader());
     }
 
     // 两块石头挂在原版的「材料」页

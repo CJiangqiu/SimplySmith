@@ -68,7 +68,7 @@ public final class SmithData {
 
         ListTag list = new ListTag();
         for (Affix affix : affixes) {
-            list.add(StringTag.valueOf(affix.id()));
+            list.add(StringTag.valueOf(affix.id().toString()));
         }
         root.put(TAG_AFFIXES, list);
     }
@@ -90,7 +90,7 @@ public final class SmithData {
     public static void setAffixes(ItemStack stack, List<Affix> affixes) {
         ListTag list = new ListTag();
         for (Affix affix : affixes) {
-            list.add(StringTag.valueOf(affix.id()));
+            list.add(StringTag.valueOf(affix.id().toString()));
         }
         stack.getOrCreateTagElement(TAG_ROOT).put(TAG_AFFIXES, list);
     }
@@ -107,7 +107,11 @@ public final class SmithData {
     /*
     读取词条列表
 
-    读到已被删除或改名的词条 id 时直接跳过，避免旧存档在词条表变动后炸掉。
+    读到已被删除或改名的词条 id 时直接跳过，避免旧存档在词条表变动后炸掉；
+    数据包被卸载时同理，物品只是掉词条，不会出问题。
+
+    写出的是带命名空间的完整 id，但读入兼容不带命名空间的写法：
+    旧存档存的就是裸 id，指令和战利品表里手写裸 id 也应当能用。
     */
     public static List<Affix> affixes(ItemStack stack) {
         CompoundTag root = stack.getTagElement(TAG_ROOT);

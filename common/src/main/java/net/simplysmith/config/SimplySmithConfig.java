@@ -140,21 +140,32 @@ public final class SimplySmithConfig {
             affixMin.put(quality, min);
             affixMax.put(quality, max);
 
-            // 不阻断启动：抽取时先尝试不放回，池子抽干后才兜底重复
-            if (max > Affixes.size()) {
-                LOGGER.warn(SimplySmith.LOG_PREFIX
-                                + "Quality '{}' allows up to {} affixes but the pool only holds {}, duplicates will appear",
-                        quality.id(), max, Affixes.size());
-            }
-
             double multiplier = toml.getDouble(SECTION_QUALITY_MULTIPLIER + "." + quality.id(),
                     qualityMultiplier.get(quality));
             qualityMultiplier.put(quality, multiplier);
         }
 
+        // 已知词条缺项或值写坏时回落各自的内置默认值
         for (Affix affix : Affixes.all()) {
-            affixBase.put(affix.id(),
-                    toml.getDouble(SECTION_AFFIX_BASE + "." + affix.id(), affix.defaultBaseValue()));
+            String key = affix.configKey();
+            affixBase.put(key, toml.getDouble(SECTION_AFFIX_BASE + "." + key, affix.defaultBaseValue()));
+        }
+
+        /*
+        再原样收下文件里我方还不认识的键
+
+        数据包词条要进世界才加载，启动读配置时池子里只有内置那些。不留住这些键的话，
+        用户为数据包词条调过的值会在这次重写里被静默删掉。
+        值写坏的直接跳过而不是记 0，让它回落到 JSON 里声明的基础值。
+        */
+        for (String key : toml.keysIn(SECTION_AFFIX_BASE)) {
+            if (affixBase.containsKey(key)) {
+                continue;
+            }
+            double value = toml.getDouble(SECTION_AFFIX_BASE + "." + key, Double.NaN);
+            if (Double.isFinite(value)) {
+                affixBase.put(key, value);
+            }
         }
     }
 
@@ -202,10 +213,22 @@ public final class SimplySmithConfig {
         sb.append("#各词条在「普通」品质下的基础数值。\n");
         sb.append("#注意：nimble（轻盈）、lifesteal（吸血）、break_army（破军）和 dodge（闪避）是百分比，0.1 表示 10%。\n");
         sb.append('[').append(SECTION_AFFIX_BASE).append("]\n");
+
+        /*
+        先按池子的顺序写已知词条，再把剩下的键补在后面
+
+        补在后面的是我方当前不认识的键——多为尚未加载的数据包词条，也可能来自已卸载的
+        数据包。照原样留住，免得用户调过的值在一次重启后凭空消失。
+        */
+        Map<String, Double> remaining = new LinkedHashMap<>(affixBase);
         for (Affix affix : Affixes.all()) {
-            sb.append(affix.id()).append(" = ")
-                    .append(affixBase.getOrDefault(affix.id(), affix.defaultBaseValue())).append('\n');
+            String key = affix.configKey();
+            Double value = remaining.remove(key);
+            sb.append(Toml.quoteIfNeeded(key)).append(" = ")
+                    .append(value != null ? value : affix.defaultBaseValue()).append('\n');
         }
+        remaining.forEach((key, value) ->
+                sb.append(Toml.quoteIfNeeded(key)).append(" = ").append(value).append('\n'));
 
         Files.createDirectories(file.getParent());
         Files.writeString(file, sb.toString(), StandardCharsets.UTF_8);
@@ -249,6 +272,24 @@ public final class SimplySmithConfig {
 
     public int affixMax(Quality quality) {
         return affixMax.getOrDefault(quality, 0);
+    }
+
+    /*
+    抽取数量超出池子容量时提醒一句
+
+    放在数据包加载完之后查而不是读配置时查：读配置发生在 mod 初始化阶段，
+    那时数据包还没读，池子里只有内置词条，按那个数报警会误伤。
+    不阻断流程——抽取本来就是先不放回，池子抽干后才兜底重复。
+    */
+    public void warnIfPoolTooSmall(int poolSize) {
+        for (Quality quality : Quality.values()) {
+            int max = affixMax(quality);
+            if (max > poolSize) {
+                LOGGER.warn(SimplySmith.LOG_PREFIX
+                                + "Quality '{}' allows up to {} affixes but the pool only holds {}, duplicates will appear",
+                        quality.id(), max, poolSize);
+            }
+        }
     }
 
     public double qualityMultiplier(Quality quality) {

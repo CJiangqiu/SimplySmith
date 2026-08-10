@@ -82,12 +82,24 @@ public enum Quality {
         return isMax() ? this : values()[ordinal() + 1];
     }
 
+    // 读 NBT 用：认不出来的一律按普通处理，不让坏数据阻断流程
     public static Quality byId(String id) {
+        Quality quality = find(id);
+        return quality != null ? quality : COMMON;
+    }
+
+    /*
+    严格查找，找不到返回 null
+
+    解析数据包时必须用这个而不是 byId：档位名拼错会被 byId 静默当成普通，
+    作者只会看到数值不对，却查不出哪里写错了。
+    */
+    public static Quality find(String id) {
         for (Quality quality : values()) {
             if (quality.id.equals(id)) {
                 return quality;
             }
         }
-        return COMMON;
+        return null;
     }
 }

@@ -51,6 +51,64 @@ Two related items are also added. Both can be found in the Ingredients creative 
 - **Enhancement Stone**: combine it with stamped equipment in an anvil to increase every affix on the item. Enhancement has no level cap and costs no experience.
 - **Breakthrough Stone**: combine it with stamped equipment in an anvil to raise its quality by one tier and fill the new affix slots. Ultimate equipment cannot be raised further.
 
+## Adding custom affixes
+
+Any mod or datapack can add attribute affixes to the shared pool. No dependency on SimplySmith is needed.
+
+Put custom affix JSON files at:
+
+```
+data/<namespace>/simplysmith/affixes/<affix_name>.json
+```
+
+The affix id comes from the file path, so `data/mymod/simplysmith/affixes/deadly.json` registers `mymod:deadly`.
+
+| Field | Required | Description |
+|---|---|---|
+| `attribute` | Yes | Registry id of the attribute to modify |
+| `operation` | No | `addition`, `multiply_base` or `multiply_total`. Defaults to `addition` |
+| `base_value` | Yes | Value at Common quality |
+| `quality_multiplier` | No | Per-quality multiplier override. Only the tiers you list are overridden; the rest fall back to the config file |
+
+```json
+{
+  "attribute": "minecraft:attack_damage",
+  "operation": "addition",
+  "base_value": 1.5,
+  "quality_multiplier": {
+    "epic": 4.0,
+    "ultimate": 20.0
+  }
+}
+```
+
+### Affix names and descriptions
+
+Affix names and descriptions are read from language files rather than the affix JSON. The key format is:
+
+```
+affix.<namespace>.<affix_name>         name
+affix.<namespace>.<affix_name>.desc    description, shown while holding Shift
+```
+
+So for `mymod:deadly`, add to `assets/mymod/lang/en_us.json`:
+
+```json
+{
+  "affix.mymod.deadly": "Deadly",
+  "affix.mymod.deadly.desc": "Increases attack damage by %s"
+}
+```
+
+`%s` receives the current value. Leave it out if the affix has no number worth showing.
+
+A plain datapack has no `assets/` folder. If you ship a datapack rather than a mod, add a matching resource pack, otherwise the tooltip shows the raw translation key.
+
+### Notes
+
+- Only attribute affixes can be added this way.
+- `base_value` can be overridden per affix under `[affix_base]` in `config/simplysmith.toml`, and the config wins where an entry exists. `quality_multiplier` in the JSON always wins for the tiers it lists.
+
 Compatible Mods:
 
 - [Cloth Config API](https://modrinth.com/mod/cloth-config)
@@ -111,6 +169,64 @@ SimplySmith 添加了装备品质、随机词条、强化和品质突破。
 
 - **强化石**：在铁砧中与已生成品质的装备合成，提升装备上的全部词条。强化等级没有上限，也不消耗经验。
 - **突破石**：在铁砧中与已生成品质的装备合成，将品质提升一档，并补齐新品质增加的词条槽位。品质到顶后无法继续突破。
+
+## 添加自定义词条
+
+任何 Mod 或数据包都可以往共用词条池里添加属性词条，不需要依赖 SimplySmith。
+
+将自定义词条 json 放在：
+
+```
+data/<命名空间>/simplysmith/affixes/<词条名>.json
+```
+
+词条 id 由文件路径推导，因此 `data/mymod/simplysmith/affixes/deadly.json` 注册的是 `mymod:deadly`。
+
+| 字段 | 必填 | 说明 |
+|---|---|---|
+| `attribute` | 是 | 要修改的属性的注册 id |
+| `operation` | 否 | `addition`、`multiply_base` 或 `multiply_total`，默认 `addition` |
+| `base_value` | 是 | 普通品质下的数值 |
+| `quality_multiplier` | 否 | 品质倍率覆盖，只有列出的档位会被覆盖，其余档位回落到配置文件 |
+
+```json
+{
+  "attribute": "minecraft:attack_damage",
+  "operation": "addition",
+  "base_value": 1.5,
+  "quality_multiplier": {
+    "epic": 4.0,
+    "ultimate": 20.0
+  }
+}
+```
+
+### 词条名和描述
+
+词条的名字和相关描述从语言文件中读取而不是在词条 json 里面，命名规则如下：
+
+```
+affix.<命名空间>.<词条名>         名称
+affix.<命名空间>.<词条名>.desc    描述，按住 Shift 时显示
+```
+
+因此 `mymod:deadly` 需要在 `assets/mymod/lang/zh_cn.json` 中添加：
+
+```json
+{
+  "affix.mymod.deadly": "致命",
+  "affix.mymod.deadly.desc": "攻击力提升 %s 点"
+}
+```
+
+`%s` 会接收当前数值。没有数值可展示的词条省略它即可。
+
+纯数据包没有 `assets/` 目录。如果你发布的是数据包而不是 Mod，需要另外配一个资源包，否则 Tooltip 会显示原始的翻译键。
+
+### 注意事项
+
+- 只能通过这种方式添加属性词条。
+- `base_value` 可以在 `config/simplysmith.toml` 的 `[affix_base]` 中按词条覆盖，存在条目时以配置文件为准。JSON 中的 `quality_multiplier` 对它列出的档位始终优先。
 
 兼容 Mod：
 

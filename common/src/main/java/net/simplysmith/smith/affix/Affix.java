@@ -1,5 +1,7 @@
 package net.simplysmith.smith.affix;
 
+import net.minecraft.Util;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -14,7 +16,10 @@ import java.util.Map;
 import java.util.UUID;
 
 /*
-一条属性型词条的定义
+一条词条的定义
+
+内置词条在 Affixes 里静态注册，外部词条由 AffixDataLoader 从数据包读入，
+两者用的是同一个类型，除了「品质倍率覆盖」只有数据包会填之外没有区别。
 */
 public final class Affix {
 
@@ -29,11 +34,31 @@ public final class Affix {
         DODGE
     }
 
-    private final String id;
+    private final ResourceLocation id;
     private final Kind kind;
     private final Attribute attribute;
     private final AttributeModifier.Operation operation;
     private final double defaultBaseValue;
+
+    /*
+    该词条自己的品质倍率，优先于全局配置
+
+    数据包可以只写其中几档，没写的档在取值时回落全局配置，所以这张表允许残缺。
+    内置词条恒为空表，全部走全局配置。
+    */
+    private final Map<Quality, Double> qualityMultipliers;
+
+    /*
+    服务端下发的实际数值，只有连远程服务器的客户端才会被赋值
+
+    Tooltip 的数值本来读的是本地配置，服务端调过而客户端没调时显示出来的数就是错的
+    （只影响显示，实际属性一直是服务端算的）。连上服务器后一律以下发值为准。
+
+    单人游戏与局域网主机不会走到这里：两端同一个 JVM、同一份配置，
+    真去覆盖反而会让游戏内配置页改完不生效。
+    */
+    private volatile Double serverBaseValue;
+    private volatile Map<Quality, Double> serverQualityMultipliers;
 
     /*
     修饰符 UUID 必须按槽位区分，不能所有槽位共用一个。
@@ -44,30 +69,52 @@ public final class Affix {
     */
     private final Map<EquipmentSlot, UUID> modifierIds = new EnumMap<>(EquipmentSlot.class);
 
-    Affix(String id, Attribute attribute, AttributeModifier.Operation operation, double defaultBaseValue) {
-        this(id, Kind.ATTRIBUTE, attribute, operation, defaultBaseValue);
+    Affix(String path, Attribute attribute, AttributeModifier.Operation operation, double defaultBaseValue) {
+        this(new ResourceLocation(SimplySmith.MOD_ID, path), Kind.ATTRIBUTE,
+                attribute, operation, defaultBaseValue, Map.of());
     }
 
-    Affix(String id, Kind kind, double defaultBaseValue) {
-        this(id, kind, null, null, defaultBaseValue);
+    Affix(String path, Kind kind, double defaultBaseValue) {
+        this(new ResourceLocation(SimplySmith.MOD_ID, path), kind, null, null, defaultBaseValue, Map.of());
     }
 
-    private Affix(String id, Kind kind, Attribute attribute, AttributeModifier.Operation operation, double defaultBaseValue) {
+    // 数据包定义与服务端下发的词条都走这个入口
+    public Affix(ResourceLocation id, Attribute attribute, AttributeModifier.Operation operation,
+                 double defaultBaseValue, Map<Quality, Double> qualityMultipliers) {
+        this(id, Kind.ATTRIBUTE, attribute, operation, defaultBaseValue, qualityMultipliers);
+    }
+
+    private Affix(ResourceLocation id, Kind kind, Attribute attribute, AttributeModifier.Operation operation,
+                  double defaultBaseValue, Map<Quality, Double> qualityMultipliers) {
         this.id = id;
         this.kind = kind;
         this.attribute = attribute;
         this.operation = operation;
         this.defaultBaseValue = defaultBaseValue;
+        this.qualityMultipliers = qualityMultipliers.isEmpty()
+                ? Map.of()
+                : new EnumMap<>(qualityMultipliers);
+
         for (EquipmentSlot slot : EquipmentSlot.values()) {
-            // 以「modid:词条id:槽位名」确定性派生，稳定且互不冲突，不用硬编码 UUID 常量
-            String seed = SimplySmith.MOD_ID + ":" + id + ":" + slot.getName();
+            // 以「词条完整 id : 槽位名」确定性派生，稳定且互不冲突，不用硬编码 UUID 常量
+            String seed = id + ":" + slot.getName();
             modifierIds.put(slot, UUID.nameUUIDFromBytes(seed.getBytes(StandardCharsets.UTF_8)));
         }
     }
 
-    // NBT、配置键、语言文件键共用的稳定标识
-    public String id() {
+    // NBT 与配置共用的稳定标识
+    public ResourceLocation id() {
         return id;
+    }
+
+    /*
+    配置文件里的键名
+
+    内置词条沿用不带命名空间的短键，老配置文件无需迁移；
+    外部词条写完整 id，写出时会被加引号，因为 TOML 的裸键不允许冒号。
+    */
+    public String configKey() {
+        return SimplySmith.MOD_ID.equals(id.getNamespace()) ? id.getPath() : id.toString();
     }
 
     public Kind kind() {
@@ -93,7 +140,36 @@ public final class Affix {
 
     // 当前生效的基础值，即普通品质下的数值
     public double baseValue() {
-        return SimplySmithConfig.get().affixBaseValue(id, defaultBaseValue);
+        Double fromServer = serverBaseValue;
+        return fromServer != null
+                ? fromServer
+                : SimplySmithConfig.get().affixBaseValue(configKey(), defaultBaseValue);
+    }
+
+    // 该词条在指定品质下的倍率：服务端下发值优先，其次自带覆盖，最后回落全局配置
+    public double qualityMultiplier(Quality quality) {
+        Map<Quality, Double> fromServer = serverQualityMultipliers;
+        if (fromServer != null) {
+            Double synced = fromServer.get(quality);
+            if (synced != null) {
+                return synced;
+            }
+        }
+
+        Double own = qualityMultipliers.get(quality);
+        return own != null ? own : SimplySmithConfig.get().qualityMultiplier(quality);
+    }
+
+    // 服务端已经把配置与自带覆盖都算完了，下发的是最终值，客户端不再叠加任何本地来源
+    public void applyServerValues(double baseValue, Map<Quality, Double> multipliers) {
+        serverBaseValue = baseValue;
+        serverQualityMultipliers = multipliers.isEmpty() ? null : new EnumMap<>(multipliers);
+    }
+
+    // 断开连接后恢复读本地配置
+    public void clearServerValues() {
+        serverBaseValue = null;
+        serverQualityMultipliers = null;
     }
 
     /*
@@ -103,7 +179,7 @@ public final class Affix {
     普通每级 +100% 基础值、不凡 +150%、稀有 +200%、史诗 +300%。
     */
     public double valueFor(Quality quality, int level) {
-        return baseValue() * SimplySmithConfig.get().qualityMultiplier(quality) * (1 + level);
+        return baseValue() * qualityMultiplier(quality) * (1 + level);
     }
 
     public UUID modifierId(EquipmentSlot slot) {
@@ -111,12 +187,17 @@ public final class Affix {
     }
 
     public AttributeModifier createModifier(EquipmentSlot slot, Quality quality, int level) {
-        return new AttributeModifier(modifierId(slot), SimplySmith.MOD_ID + ":" + id,
-                valueFor(quality, level), operation);
+        return new AttributeModifier(modifierId(slot), id.toString(), valueFor(quality, level), operation);
     }
 
+    /*
+    词条名的翻译键，形如 affix.<命名空间>.<词条名>
+
+    用原版给物品、方块、附魔生成翻译键的同一个工具，别的 Mod 把词条名写进自己的
+    语言文件即可，不需要我方转发文本。
+    */
     public String translationKey() {
-        return "affix." + SimplySmith.MOD_ID + "." + id;
+        return Util.makeDescriptionId("affix", id);
     }
 
     /*
