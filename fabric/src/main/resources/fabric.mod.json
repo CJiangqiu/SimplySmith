@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "id": "simplysmith",
+  "version": "${version}",
+  "name": "CJiangqiu's SimplySmith",
+  "description": "Adds gear quality, random affixes, enhancement, and quality breakthroughs.",
+  "authors": [
+    "CJiangqiu"
+  ],
+  "license": "MIT",
+  "icon": "assets/simplysmith/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "net.simplysmith.fabric.SimplySmithFabric"
+    ],
+    "client": [
+      "net.simplysmith.fabric.client.SimplySmithFabricClient"
+    ],
+    "modmenu": [
+      "net.simplysmith.fabric.client.SimplySmithModMenu"
+    ]
+  },
+  "mixins": [
+    "simplysmith.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.19.3",
+    "minecraft": "~1.20.1",
+    "java": ">=17",
+    "fabric-api": "*"
+  },
+  "suggests": {
+    "cloth-config": "*",
+    "modmenu": "*"
+  }
+}

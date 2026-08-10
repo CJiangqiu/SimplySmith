@@ -1,0 +1,53 @@
+package net.simplysmith.mixin;
+
+import net.minecraft.core.NonNullList;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+
+import net.simplysmith.smith.AffixRoller;
+import net.simplysmith.smith.SmithData;
+
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import java.util.List;
+
+/*
+物品首次进入背包时初始化
+原版没有能覆盖全部入包路径的事件：拾取、合成产出、容器转移、给予指令、创造模式取物
+走的是各自独立的代码路径。所以改为每 tick 扫一遍背包，只处理尚未初始化盖章的物品。
+
+*/
+@Mixin(Inventory.class)
+public abstract class InventoryMixin {
+
+    @Shadow
+    @Final
+    public Player player;
+
+    @Shadow
+    @Final
+    private List<NonNullList<ItemStack>> compartments;
+
+    @Inject(method = "tick", at = @At("TAIL"))
+    private void simplysmith$stampNewItems(CallbackInfo ci) {
+        // 只在服务端盖章，结果随容器同步下发给客户端
+        if (player.level().isClientSide) {
+            return;
+        }
+
+        for (NonNullList<ItemStack> compartment : compartments) {
+            for (int i = 0; i < compartment.size(); i++) {
+                ItemStack stack = compartment.get(i);
+                if (SmithData.canStamp(stack)) {
+                    AffixRoller.stamp(stack, player.getRandom());
+                }
+            }
+        }
+    }
+}

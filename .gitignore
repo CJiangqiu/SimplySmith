@@ -1,0 +1,48 @@
+# ---- Gradle ----
+.gradle/
+build/
+out/
+classes/
+gradle-app.setting
+local.properties
+
+# ---- Loom / Architectury ----
+.architectury-transformer/
+remappedSrc/
+run/
+runs/
+run-data/
+logs/
+crash-reports/
+
+# ---- IDE：IntelliJ IDEA ----
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# ---- IDE：Eclipse ----
+.settings/
+.metadata/
+.classpath
+.project
+bin/
+
+# ---- IDE：VS Code ----
+.vscode/
+
+# ---- Claude Code 本地工作文件（不入库）----
+CLAUDE.md
+CLAUDE.local.md
+.claude/
+.mcp.json
+
+# ---- 系统 ----
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---- 其他本地文件 ----
+*.log
+*.bak
+*.tmp

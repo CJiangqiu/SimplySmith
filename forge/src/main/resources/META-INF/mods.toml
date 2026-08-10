@@ -1,0 +1,32 @@
+modLoader = "javafml"
+loaderVersion = "[47,)"
+license = "MIT"
+
+[[mods]]
+modId = "simplysmith"
+version = "${version}"
+displayName = "CJiangqiu's SimplySmith"
+authors = "CJiangqiu"
+description = '''Adds gear quality, random affixes, enhancement, and quality breakthroughs.'''
+logoFile = "assets/simplysmith/icon.png"
+
+[[dependencies.simplysmith]]
+modId = "forge"
+mandatory = true
+versionRange = "[47,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.simplysmith]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[1.20.1,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.simplysmith]]
+modId = "cloth_config"
+mandatory = false
+versionRange = "[11,)"
+ordering = "AFTER"
+side = "CLIENT"
