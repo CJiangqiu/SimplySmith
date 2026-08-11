@@ -4,9 +4,16 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.DiggerItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ProjectileWeaponItem;
+import net.minecraft.world.item.SwordItem;
 
 import net.simplysmith.SimplySmith;
 import net.simplysmith.smith.affix.Affix;
@@ -37,9 +44,33 @@ public final class SmithData {
         return !stack.isEmpty() && !isStamped(stack) && isGear(stack);
     }
 
-    // 不可堆叠物品都可初始化
+    // 标签、基类、正攻击力或耐久命中任意一项即可初始化
     public static boolean isGear(ItemStack stack) {
-        return !stack.isEmpty() && stack.getMaxStackSize() == 1;
+        if (stack.isEmpty()) {
+            return false;
+        }
+
+        if (stack.is(ItemTags.TOOLS) || stack.is(ItemTags.TRIMMABLE_ARMOR)) {
+            return true;
+        }
+
+        if (stack.getItem() instanceof ArmorItem || stack.getItem() instanceof SwordItem
+                || stack.getItem() instanceof DiggerItem || stack.getItem() instanceof ProjectileWeaponItem) {
+            return true;
+        }
+
+        return attackDamage(stack) > 0.0D || stack.isDamageableItem();
+    }
+
+    private static double attackDamage(ItemStack stack) {
+        double total = 0.0D;
+        for (AttributeModifier modifier : stack.getItem()
+                .getDefaultAttributeModifiers(EquipmentSlot.MAINHAND).get(Attributes.ATTACK_DAMAGE)) {
+            if (modifier.getOperation() == AttributeModifier.Operation.ADDITION) {
+                total += modifier.getAmount();
+            }
+        }
+        return total;
     }
 
     // 词条是否在该槽位生效
