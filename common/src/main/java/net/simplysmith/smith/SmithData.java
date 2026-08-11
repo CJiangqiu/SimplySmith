@@ -4,16 +4,9 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.attributes.AttributeModifier;
-import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.item.DiggerItem;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.ProjectileWeaponItem;
-import net.minecraft.world.item.SwordItem;
 
 import net.simplysmith.SimplySmith;
 import net.simplysmith.smith.affix.Affix;
@@ -44,48 +37,9 @@ public final class SmithData {
         return !stack.isEmpty() && !isStamped(stack) && isGear(stack);
     }
 
-    // 是否算作装备
+    // 不可堆叠物品都可初始化
     public static boolean isGear(ItemStack stack) {
-        // 前置：只处理不可堆叠的物品
-        if (stack.getMaxStackSize() != 1) {
-            return false;
-        }
-
-        // 有耐久的一律算，这条覆盖面最广
-        if (stack.getMaxDamage() > 0) {
-            return true;
-        }
-
-        // 能穿戴的：盔甲、鞘翅归各自部位，盾牌归副手，都不是主手
-        if (LivingEntity.getEquipmentSlotForItem(stack) != EquipmentSlot.MAINHAND) {
-            return true;
-        }
-
-        Item item = stack.getItem();
-        if (item instanceof SwordItem || item instanceof DiggerItem
-                || item instanceof ProjectileWeaponItem) {
-            return true;
-        }
-
-        if (stack.is(ItemTags.SWORDS) || stack.is(ItemTags.TOOLS)
-                || stack.is(ItemTags.TRIMMABLE_ARMOR)) {
-            return true;
-        }
-
-        // 兜底：主手能打出伤害的就算武器，收下不继承原版基类也没打标签的那些
-        return attackDamage(stack) > 0.0D;
-    }
-
-    // 物品自身的主手攻击力
-    private static double attackDamage(ItemStack stack) {
-        double total = 0.0D;
-        for (AttributeModifier modifier : stack.getItem()
-                .getDefaultAttributeModifiers(EquipmentSlot.MAINHAND).get(Attributes.ATTACK_DAMAGE)) {
-            if (modifier.getOperation() == AttributeModifier.Operation.ADDITION) {
-                total += modifier.getAmount();
-            }
-        }
-        return total;
+        return !stack.isEmpty() && stack.getMaxStackSize() == 1;
     }
 
     // 词条是否在该槽位生效

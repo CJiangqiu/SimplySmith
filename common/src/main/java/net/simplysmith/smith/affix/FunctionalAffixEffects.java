@@ -225,6 +225,11 @@ public final class FunctionalAffixEffects {
                     if (target.getHealth() != expectedHealth) {
                         target.getEntityData().set(LivingEntityAccessor.simplysmith$getHealthDataId(), expectedHealth);
                         if (expectedHealth <= 0.0F) {
+                            LivingEntityAccessor accessor = (LivingEntityAccessor) target;
+                            accessor.simplysmith$setLastHurtByPlayer(player);
+                            accessor.simplysmith$setLastHurtByPlayerTime(100);
+                            target.setLastHurtByMob(player);
+                            target.getCombatTracker().recordDamage(source, amount);
                             target.die(source);
                         }
                     }
@@ -274,9 +279,6 @@ public final class FunctionalAffixEffects {
                 && !player.isSprinting();
     }
 
-    // 变色龙：站定即隐身，一旦位移立即现形
-    private static final double STILL_EPSILON = 1.0E-6D;
-
     // 夜莺的攻击冷却，固定不随词条数值变化
     private static final int NIGHTINGALE_COOLDOWN_TICKS = 20 * 6;
 
@@ -297,9 +299,8 @@ public final class FunctionalAffixEffects {
             Registries.DAMAGE_TYPE, new ResourceLocation(SimplySmith.MOD_ID, "true_damage"));
 
     // 变色龙：站定即隐身
-    private static boolean isChameleonHidden(Player player) {
-        return player.distanceToSqr(player.xo, player.yo, player.zo) <= STILL_EPSILON
-                && hasEquipped(player, Affixes.CHAMELEON);
+    private static boolean isChameleonHidden(Player player, boolean moved) {
+        return !moved && hasEquipped(player, Affixes.CHAMELEON);
     }
 
     // 夜莺：潜行即真实隐身
@@ -320,15 +321,22 @@ public final class FunctionalAffixEffects {
         return hasEquipped(entity, Affixes.CHAMELEON) || hasEquipped(entity, Affixes.NIGHTINGALE);
     }
 
-    public static void tickInvisibility(Player player) {
-        if (isChameleonHidden(player) || isNightingaleHidden(player)) {
-            player.setInvisible(true);
+    public static boolean tickInvisibility(Player player, boolean moved, boolean affixSetInvisible) {
+        if (isChameleonHidden(player, moved) || isNightingaleHidden(player)) {
+            if (!player.isInvisible()) {
+                player.setInvisible(true);
+                affixSetInvisible = true;
+            }
             if (isTrulyInvisible(player)) {
                 breakNearbyAggro(player);
             }
-        } else if (player.isInvisible() && !player.hasEffect(MobEffects.INVISIBILITY)) {
+            return affixSetInvisible;
+        }
+
+        if (affixSetInvisible && !player.hasEffect(MobEffects.INVISIBILITY)) {
             player.setInvisible(false);
         }
+        return false;
     }
 
     // 让附近已经锁定自己的敌人立刻脱战
@@ -352,8 +360,6 @@ public final class FunctionalAffixEffects {
         if (player.level().isClientSide) {
             return;
         }
-
-        tickInvisibility(player);
 
         for (EquipmentSlot slot : EquipmentSlot.values()) {
             ItemStack stack = player.getItemBySlot(slot);

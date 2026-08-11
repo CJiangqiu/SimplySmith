@@ -12,6 +12,7 @@ import net.simplysmith.smith.SmithData;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -22,6 +23,9 @@ import java.util.List;
 @Mixin(Inventory.class)
 public abstract class InventoryMixin {
 
+    @Unique
+    private static final double SIMPLYSMITH$MOVEMENT_EPSILON = 1.0E-6D;
+
     @Shadow
     @Final
     public Player player;
@@ -29,6 +33,21 @@ public abstract class InventoryMixin {
     @Shadow
     @Final
     private List<NonNullList<ItemStack>> compartments;
+
+    @Unique
+    private boolean simplysmith$hasLastPosition;
+
+    @Unique
+    private double simplysmith$lastX;
+
+    @Unique
+    private double simplysmith$lastY;
+
+    @Unique
+    private double simplysmith$lastZ;
+
+    @Unique
+    private boolean simplysmith$affixSetInvisible;
 
     @Inject(method = "tick", at = @At("TAIL"))
     private void simplysmith$stampNewItems(CallbackInfo ci) {
@@ -47,6 +66,16 @@ public abstract class InventoryMixin {
             }
         }
 
+        boolean moved = simplysmith$hasLastPosition
+                && player.distanceToSqr(simplysmith$lastX, simplysmith$lastY, simplysmith$lastZ)
+                > SIMPLYSMITH$MOVEMENT_EPSILON;
+        simplysmith$lastX = player.getX();
+        simplysmith$lastY = player.getY();
+        simplysmith$lastZ = player.getZ();
+        simplysmith$hasLastPosition = true;
+
+        simplysmith$affixSetInvisible = FunctionalAffixEffects.tickInvisibility(
+                player, moved, simplysmith$affixSetInvisible);
         FunctionalAffixEffects.tickEquipment(player);
     }
 }
