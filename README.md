@@ -28,14 +28,14 @@ Attribute-affix values are calculated as `base value × quality multiplier × (1
 
 | Affix | Category | Effect |
 |---|---|---|
+| Strength | Weapon | +1 Attack Damage |
+| Frenzy | Weapon | +0.1 Attack Speed |
+| Impact | Weapon | +0.1 Attack Knockback |
 | Vitality | Armor | +2 Max Health |
 | Steadfast | Armor | +0.05 Knockback Resistance |
 | Sturdy | Armor | +2 Armor |
 | Tenacity | Armor | +2 Armor Toughness |
 | Nimble | Generic | +10% Movement Speed |
-| Strength | Weapon | +1 Attack Damage |
-| Frenzy | Weapon | +0.1 Attack Speed |
-| Impact | Weapon | +0.1 Attack Knockback |
 | Fortune | Generic | +1 Luck |
 
 ### Functional affixes
@@ -44,10 +44,17 @@ Attribute-affix values are calculated as `base value × quality multiplier × (1
 |---|---|---:|---|
 | Lifesteal | Weapon | 10% | Restore this percentage of actual damage dealt. Healing beyond full health becomes absorption. |
 | Bloodrage | Weapon | +2 | Above 1 health, spend 1 health on a melee attack to add this damage. |
-| Experience Mending | Generic | 2 | For each held or equipped damaged item, consume 1 experience point per tick to restore this much durability. |
-| Eternal | Tool | — | Durability is always kept full. |
 | Break Army | Weapon | +100% | Increase vanilla critical-hit damage by this percentage. |
+| Sharpshooter | Weapon | +10% | All damage you deal grows by this much per block of distance, counting from 2 blocks out. No distance cap. |
+| Backstab | Weapon | +200% | Melee attacks landed within a 90° arc behind the target's body deal this much extra damage. |
+| Nightingale | Weapon | +300% | Turns truly invisible while sneaking and immediately breaks combat. Attacking adds this much damage, reveals you, and puts the weapon on a fixed 6 second cooldown. |
+| Eternal | Tool | — | Durability is always kept full. |
+| Refined Drill | Tool | +1 | Raises the tool's mining level by this many tiers. Only applies to blocks that use vanilla tier requirements. |
+| Excavator | Tool | +50% | Increases mining speed by this percentage. |
+| Midas Touch | Tool | 10% | Chance to drop an extra gold nugget when mining stone blocks. Capped at 100%. |
 | Immortal | Armor | -1 s | On death, remain at 1 health. Cooldown is 60 seconds minus this value, with a minimum of 1 second. Uses Minecraft's normal item cooldown. |
+| Chameleon | Armor | — | Turns fully invisible while standing still, including armor and held items, and reappears the moment you move. |
+| Experience Mending | Generic | 2 | For each held or equipped damaged item, consume 1 experience point per tick to restore this much durability. |
 | Dodge | Generic | 10% | Values from both hands and all worn armor add together; incoming damage is cancelled on success, capped at 99%. |
 | Flame Infusion | Generic | 3 s | Damaging an enemy sets it on fire for this long. |
 | Frost Infusion | Generic | 3 s | Damaging an enemy freezes it solid for this long. |
@@ -55,13 +62,6 @@ Attribute-affix values are calculated as `base value × quality multiplier × (1
 | Poison Infusion | Generic | 3 s | Damaging an enemy applies Poison III for this long. |
 | Wither Infusion | Generic | 3 s | Damaging an enemy applies Wither III for this long. |
 | True Damage Infusion | Generic | 2 | Damaging an enemy deals this much extra true damage. |
-| Sharpshooter | Weapon | +10% | All damage you deal grows by this much per block of distance, counting from 2 blocks out. No distance cap. |
-| Backstab | Weapon | +200% | Melee attacks landed within a 90° arc behind the target's body deal this much extra damage. |
-| Nightingale | Weapon | +300% | Turns truly invisible while sneaking and immediately breaks combat. Attacking adds this much damage, reveals you, and puts the weapon on a fixed 6 second cooldown. |
-| Chameleon | Armor | — | Turns fully invisible while standing still, including armor and held items, and reappears the moment you move. |
-| Refined Drill | Tool | +1 | Raises the tool's mining level by this many tiers. Only applies to blocks that use vanilla tier requirements. |
-| Excavator | Tool | +50% | Increases mining speed by this percentage. |
-| Midas Touch | Tool | 10% | Chance to drop an extra gold nugget when mining stone blocks. Capped at 100%. |
 
 ### Added items
 
@@ -168,14 +168,14 @@ SimplySmith 添加了装备品质、随机词条、强化和品质突破。
 
 | 词条 | 分类 | 效果 |
 |---|---|---|
+| 力量 | 武器 | 攻击力 +1 |
+| 狂暴 | 武器 | 攻击速度 +0.1 |
+| 冲击 | 武器 | 攻击击退 +0.1 |
 | 强壮 | 盔甲 | 最大生命值 +2 |
 | 磐石 | 盔甲 | 击退抗性 +0.05 |
 | 坚固 | 盔甲 | 护甲 +2 |
 | 坚韧 | 盔甲 | 护甲韧性 +2 |
 | 轻盈 | 普通 | 移动速度 +10% |
-| 力量 | 武器 | 攻击力 +1 |
-| 狂暴 | 武器 | 攻击速度 +0.1 |
-| 冲击 | 武器 | 攻击击退 +0.1 |
 | 幸运 | 普通 | 幸运 +1 |
 
 ### 功能词条
@@ -184,10 +184,17 @@ SimplySmith 添加了装备品质、随机词条、强化和品质突破。
 |---|---|---:|---|
 | 吸血 | 武器 | 10% | 攻击造成实际伤害时，恢复该比例生命；治疗溢出转化为伤害吸收。 |
 | 血怒 | 武器 | +2 | 生命高于 1 点时，近战攻击消耗 1 点生命并额外造成该伤害。 |
-| 经验修补 | 普通 | 2 | 每件被手持或穿戴、且耐久未满的装备，每 tick 消耗 1 点经验并恢复该耐久。 |
-| 永恒 | 工具 | — | 耐久始终保持满值。 |
 | 破军 | 武器 | +100% | 原版暴击伤害额外提升该百分比。 |
+| 神射手 | 武器 | +10% | 你造成的一切伤害，从 2 格外开始每格提升该比例，不设距离上限。 |
+| 背刺 | 武器 | +200% | 近战命中目标身体正后方 90 度扇形内时，额外造成该伤害。 |
+| 夜莺 | 武器 | +300% | 潜行时进入真实隐身，立刻脱战；攻击时额外造成该伤害、解除隐身，并使武器进入固定 6 秒冷却。 |
+| 永恒 | 工具 | — | 耐久始终保持满值。 |
+| 精炼钻头 | 工具 | +1 | 该工具的挖掘等级提升对应级数，仅对使用原版等级要求的方块生效。 |
+| 挖掘机 | 工具 | +50% | 挖掘速度提升对应百分比。 |
+| 点石成金 | 工具 | 10% | 挖掘石头类方块时，按该概率额外掉落一个金粒，最高 100%。 |
 | 不朽 | 盔甲 | -1 秒 | 死亡时保留 1 点生命；冷却为 60 秒减去该数值，最低 1 秒，使用原版同类物品共享冷却。 |
+| 变色龙 | 盔甲 | — | 站定不动时完全隐形，连同盔甲与手持物一并消失，一旦移动立即现形。 |
+| 经验修补 | 普通 | 2 | 每件被手持或穿戴、且耐久未满的装备，每 tick 消耗 1 点经验并恢复该耐久。 |
 | 闪避 | 普通 | 10% | 主手、副手与全部穿戴装备的数值直接相加；成功时取消本次伤害，最高 99%。 |
 | 火焰附加 | 普通 | 3 秒 | 造成伤害时使敌人着火该时长。 |
 | 冰冻附加 | 普通 | 3 秒 | 造成伤害时使敌人完全冻结该时长。 |
@@ -195,13 +202,6 @@ SimplySmith 添加了装备品质、随机词条、强化和品质突破。
 | 毒素附加 | 普通 | 3 秒 | 造成伤害时使敌人中毒 III，持续该时长。 |
 | 凋零附加 | 普通 | 3 秒 | 造成伤害时使敌人凋零 III，持续该时长。 |
 | 真伤附加 | 普通 | 2 | 造成伤害时额外造成该点数的真实伤害。 |
-| 神射手 | 武器 | +10% | 你造成的一切伤害，从 2 格外开始每格提升该比例，不设距离上限。 |
-| 背刺 | 武器 | +200% | 近战命中目标身体正后方 90 度扇形内时，额外造成该伤害。 |
-| 夜莺 | 武器 | +300% | 潜行时进入真实隐身，立刻脱战；攻击时额外造成该伤害、解除隐身，并使武器进入固定 6 秒冷却。 |
-| 变色龙 | 盔甲 | — | 站定不动时完全隐形，连同盔甲与手持物一并消失，一旦移动立即现形。 |
-| 精炼钻头 | 工具 | +1 | 该工具的挖掘等级提升对应级数，仅对使用原版等级要求的方块生效。 |
-| 挖掘机 | 工具 | +50% | 挖掘速度提升对应百分比。 |
-| 点石成金 | 工具 | 10% | 挖掘石头类方块时，按该概率额外掉落一个金粒，最高 100%。 |
 
 ### 新增物品
 本Mod新增了两种强化物品，均可在创造模式的原材料栏中找到：
