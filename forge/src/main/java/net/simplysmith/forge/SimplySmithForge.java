@@ -28,17 +28,10 @@ import java.util.Map;
 @Mod(SimplySmith.MOD_ID)
 public final class SimplySmithForge {
 
-    /*
-    构造器参数由 FML 注入
-
-    FMLModContainer 构造 Mod 实例时会先找接收 FMLJavaModLoadingContext 的构造器，
-    找不到才退回无参的。走这条路拿 context，就不必再调
-    FMLJavaModLoadingContext.get() 与 ModLoadingContext.get()——这两个静态入口
-    在本版本已被标记为待删除，而它们的官方替代品尚未回移到 1.20.1 分支。
-    */
+    // 构造器参数由 FML 注入
     public SimplySmithForge(FMLJavaModLoadingContext context) {
         // 先注入平台能力，再执行通用层初始化，顺序不可颠倒
-        // FMLPaths.CONFIGDIR 与 Fabric 的 getConfigDir() 指向同一个 .minecraft/config
+        // 使用通用配置目录
         PlatformBridge.init(FMLPaths.CONFIGDIR.get());
 
         IEventBus modEventBus = context.getModEventBus();
@@ -49,26 +42,18 @@ public final class SimplySmithForge {
         modEventBus.addListener(SimplySmithForge::addToCreativeTab);
 
         // 词条加载器挂在数据包一侧，随世界加载与 /reload 一起重跑
-        // AddReloadListenerEvent 走的是 Forge 总线而非 Mod 总线，注册错总线不会报错、只是永远不触发
+        // 在 Forge 总线注册数据包重载监听器
         MinecraftForge.EVENT_BUS.addListener(SimplySmithForge::addReloadListener);
 
         // OnDatapackSyncEvent 同时覆盖玩家进服与 /reload 两个时机
         ForgeAffixNetwork.register();
         MinecraftForge.EVENT_BUS.addListener(SimplySmithForge::syncAffixes);
 
-        /*
-        数据包词条属于服务端，服务端一停就得清掉
-
-        单人游戏退出世界走的是这条：客户端的断连回调会因为「与服务端同 JVM」而跳过重置，
-        不在这里清的话，上一个世界的词条会留到主菜单，甚至带进下一个世界。
-        */
+        // 数据包词条属于服务端，服务端一停就得清掉
         MinecraftForge.EVENT_BUS.addListener(
                 (ServerStoppedEvent event) -> Affixes.replaceDataDriven(Map.of()));
 
-        /*
-        内层 lambda 才引用客户端类，专用服务端不会执行外层 Supplier，
-        因此那个类不会被加载。
-        */
+        // 延迟引用客户端类，避免专用服务端加载
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
                 () -> () -> SimplySmithForgeClient.registerConfigScreen(context));
 

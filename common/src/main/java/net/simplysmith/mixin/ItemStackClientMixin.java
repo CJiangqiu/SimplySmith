@@ -22,21 +22,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.List;
 
-/*
-物品显示的客户端接管
-
-只放在 client mixin 列表：一是避免服务端把可翻译物品名提前展开成固定语言文本，
-二是词条展开要读键盘状态，Screen 是客户端类，留在通用层会让专用服务端加载不到。
-*/
+// 物品显示的客户端接管
 @Mixin(ItemStack.class)
 public abstract class ItemStackClientMixin {
 
     // 词条数值行相对词条名的缩进
     private static final String SIMPLYSMITH$INDENT = "  ";
 
-    /*
-    传奇以上没有对应的原版 Rarity，在显示名出口补上自有品质样式。
-    */
+    // 传奇以上没有对应的原版 Rarity，在显示名出口补上自有品质样式。
     @Inject(method = "getHoverName", at = @At("RETURN"), cancellable = true)
     private void simplysmith$applyCustomQualityStyle(CallbackInfoReturnable<Component> cir) {
         ItemStack stack = (ItemStack) (Object) this;
@@ -50,12 +43,7 @@ public abstract class ItemStackClientMixin {
         }
     }
 
-    /*
-    在 Tooltip 里追加品质、强化等级与词条，插在物品名之后
-
-    默认只列词条名，按住 Shift 时在每条下面缩进补一行实际数值。
-    Tooltip 每帧重新生成，所以按键状态是实时的，不需要额外刷新。
-    */
+    // 在 Tooltip 里追加品质、强化等级与词条，插在物品名之后
     @Inject(method = "getTooltipLines", at = @At("RETURN"))
     private void simplysmith$appendTooltip(Player player, TooltipFlag flag, CallbackInfoReturnable<List<Component>> cir) {
         ItemStack stack = (ItemStack) (Object) this;

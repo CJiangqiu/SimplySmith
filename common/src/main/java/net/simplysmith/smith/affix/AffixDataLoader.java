@@ -27,24 +27,7 @@ import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 
-/*
-从数据包读取外部词条定义
-
-扫描路径 data/<任意命名空间>/simplysmith/affixes/<词条名>.json，
-词条 id 由路径推导，例如 data/othermod/simplysmith/affixes/deadly.json 得到 othermod:deadly。
-词条名与描述不在 JSON 里写，客户端按 affix.<命名空间>.<词条名> 去语言文件取，
-所以定义方把文本放进自己的语言文件即可。
-
-字段：
-  attribute          必填，属性的注册 id
-  operation          可选，addition / multiply_base / multiply_total，默认 addition
-  base_value         必填，普通品质下的基础值
-  category           可选，weapon / tool / armor / generic，默认 generic
-  quality_multiplier 可选，品质倍率覆盖表，可只写部分档，没写的档回落全局配置
-
-单个文件出错只跳过该文件并打日志，不中断整次重载，
-否则一个手滑的整合包配置会让整个世界加载不出来。
-*/
+// 从数据包读取外部词条定义
 public class AffixDataLoader extends SimpleJsonResourceReloadListener {
 
     public static final String DIRECTORY = SimplySmith.MOD_ID + "/affixes";
@@ -61,11 +44,7 @@ public class AffixDataLoader extends SimpleJsonResourceReloadListener {
         Map<ResourceLocation, Affix> loaded = new LinkedHashMap<>();
 
         files.forEach((id, element) -> {
-            /*
-            内置词条不允许被数据包顶掉：功能型词条的行为写在 Java 里，
-            一份属性型定义顶上去会让它的效果凭空消失，而且没有任何报错。
-            要改内置词条的数值请走配置文件。
-            */
+            // 禁止数据包覆盖内置词条
             if (Affixes.isBuiltIn(id)) {
                 LOGGER.warn(SimplySmith.LOG_PREFIX
                         + "Affix '{}' clashes with a built-in affix and was ignored, use the config file to retune built-ins", id);
@@ -97,13 +76,7 @@ public class AffixDataLoader extends SimpleJsonResourceReloadListener {
             throw new IllegalArgumentException("base_value must be a finite number");
         }
 
-        /*
-        属性没有挂在玩家身上时只警告不拒绝
-
-        AttributeMap 对玩家身上不存在的属性是静默丢弃的——不报错、不打日志，
-        词条看着正常、实际毫无效果，不主动提示的话排查起来极其费时。
-        另外别的 Mod 的属性未必两个平台都注册，装载方自己心里有数即可，我方不替它决定。
-        */
+        // 属性没有挂在玩家身上时只警告不拒绝
         if (!DefaultAttributes.getSupplier(EntityType.PLAYER).hasAttribute(attribute)) {
             LOGGER.warn(SimplySmith.LOG_PREFIX
                             + "Affix '{}' uses attribute '{}' which is not present on players, it will have no effect",
@@ -148,12 +121,7 @@ public class AffixDataLoader extends SimpleJsonResourceReloadListener {
         }
     }
 
-    /*
-    品质倍率覆盖表
-
-    允许残缺：只写想改的档，剩下的在 Affix.qualityMultiplier 里回落全局配置。
-    档位名拼错时直接报错而不是忽略，否则作者只会看到数值不对却找不到原因。
-    */
+    // 品质倍率覆盖表
     private static Map<Quality, Double> readQualityMultipliers(JsonObject json) {
         JsonObject section = GsonHelper.getAsJsonObject(json, "quality_multiplier", null);
         if (section == null) {

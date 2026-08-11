@@ -9,16 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/*
-极简 TOML 读取，只负责读；写出由 SimplySmithConfig 自己拼，方便控制注释排版
-
-支持的语法：[section] 段落头、key = value、# 整行注释与行尾注释
-值类型：布尔、整数、小数、双引号字符串
-不支持数组、内联表、多行字符串——配置项全是标量用不上
-自己写是为了不给 Fabric 端引 TOML 库（Forge 自带的那套 Fabric 没有）
-
-结果按「段落.键」扁平存放，段落外的键直接用键名
-*/
+// 简单 TOML 读取器
 public final class Toml {
 
     private final Map<String, String> values = new LinkedHashMap<>();
@@ -57,12 +48,7 @@ public final class Toml {
         return toml;
     }
 
-    /*
-    去掉键上的引号
-
-    带命名空间的词条 id 含冒号，而 TOML 的裸键不允许冒号，只能写成 "othermod:deadly"。
-    存进表里时统一去引号，调用方拿 id 原文查即可。
-    */
+    // 去掉键上的引号
     private static String unquote(String key) {
         if (key.length() >= 2 && key.charAt(0) == '"' && key.charAt(key.length() - 1) == '"') {
             return key.substring(1, key.length() - 1);
@@ -75,12 +61,7 @@ public final class Toml {
         return key.indexOf(':') < 0 ? key : '"' + key + '"';
     }
 
-    /*
-    列出某个段落下的全部键名，顺序与文件中一致
-
-    用于把配置文件里我方当前不认识的键原样留住：数据包词条要到进世界才加载，
-    启动时重写配置若只写已知词条，用户为数据包词条调过的值会被静默删掉。
-    */
+    // 列出某个段落下的全部键名，顺序与文件中一致
     public List<String> keysIn(String section) {
         String prefix = section + ".";
         List<String> keys = new ArrayList<>();

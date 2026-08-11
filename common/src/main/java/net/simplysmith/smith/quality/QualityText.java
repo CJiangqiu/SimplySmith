@@ -6,10 +6,7 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.Util;
 
-/*
-品质文本样式
-前六档使用单色；究极品质按时间连续改变色相，并让相邻字符错开色相形成缓慢流动的彩虹。
-*/
+// 品质文本样式
 public final class QualityText {
 
     // 完整流动一轮所需时间；数值越大变化越慢

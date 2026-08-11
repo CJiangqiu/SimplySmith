@@ -13,12 +13,7 @@ import net.simplysmith.smith.affix.Affixes;
 
 import java.util.Map;
 
-/*
-Fabric 侧的词条表下发
-
-两个时机：玩家进服，以及 /reload 之后——重载会换掉整张表，不重发的话
-在线玩家手上还是旧的。
-*/
+// Fabric 侧的词条表下发
 public final class FabricAffixNetwork {
 
     private FabricAffixNetwork() {
@@ -33,12 +28,7 @@ public final class FabricAffixNetwork {
             }
         });
 
-        /*
-        数据包词条属于服务端，服务端一停就得清掉
-
-        单人游戏退出世界走的是这条：客户端的断连回调会因为「与服务端同 JVM」而跳过重置，
-        不在这里清的话，上一个世界的词条会留到主菜单，甚至带进下一个世界。
-        */
+        // 数据包词条属于服务端，服务端一停就得清掉
         ServerLifecycleEvents.SERVER_STOPPED.register(server -> Affixes.replaceDataDriven(Map.of()));
     }
 

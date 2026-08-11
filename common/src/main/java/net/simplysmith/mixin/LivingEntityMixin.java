@@ -7,16 +7,15 @@ import net.minecraft.world.entity.player.Player;
 import net.simplysmith.smith.affix.FunctionalAffixEffects;
 
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/*
-闪避必须同时处理 hurt 与 actuallyHurt：通常伤害走 hurt，再由它调用 actuallyHurt；
-少数实体会直接调用 actuallyHurt。hurtDepth 用来防止同一段标准伤害链掷两次闪避骰子。
-*/
+// hurt 与 actuallyHurt 共用一次闪避判定
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin {
 
@@ -32,6 +31,16 @@ public abstract class LivingEntityMixin {
     @Unique
     private DamageSource simplysmith$damageSource;
 
+    // 原版记录的上一次伤害量，附加伤害结算前后要靠它还原无敌帧状态
+    @Shadow
+    protected float lastHurt;
+
+    // 神射手按攻击者与目标的距离放大伤害
+    @ModifyVariable(method = "hurt", at = @At("HEAD"), argsOnly = true, ordinal = 0)
+    private float simplysmith$applySharpshooter(float amount, DamageSource source, float original) {
+        return FunctionalAffixEffects.applySharpshooter((LivingEntity) (Object) this, source, amount);
+    }
+
     @Inject(method = "hurt", at = @At("HEAD"), cancellable = true)
     private void simplysmith$tryDodgeAtHurt(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         simplysmith$hurtDepth++;
@@ -44,6 +53,22 @@ public abstract class LivingEntityMixin {
     @Inject(method = "hurt", at = @At("RETURN"))
     private void simplysmith$leaveHurt(CallbackInfoReturnable<Boolean> cir) {
         simplysmith$hurtDepth = Math.max(0, simplysmith$hurtDepth - 1);
+    }
+
+    // 着火、冰冻、雷电、毒素、凋零、真伤六条附加词条的触发点
+    @Inject(method = "hurt", at = @At("HEAD"))
+    private void simplysmith$applyOnHitAffixes(DamageSource source, float amount,
+                                               CallbackInfoReturnable<Boolean> cir) {
+        LivingEntity self = (LivingEntity) (Object) this;
+
+        // 在附加伤害后恢复主伤害的无敌帧状态
+        int invulnerable = self.invulnerableTime;
+        float previousHurt = lastHurt;
+
+        FunctionalAffixEffects.applyOnHitAffixes(self, source);
+
+        self.invulnerableTime = invulnerable;
+        lastHurt = previousHurt;
     }
 
     @Inject(method = "actuallyHurt", at = @At("HEAD"), cancellable = true)

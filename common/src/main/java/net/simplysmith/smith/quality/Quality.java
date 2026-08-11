@@ -3,9 +3,7 @@ package net.simplysmith.smith.quality;
 import net.minecraft.ChatFormatting;
 import net.minecraft.world.item.Rarity;
 
-/*
-物品品质
-*/
+// 物品品质
 public enum Quality {
 
     COMMON("common", Rarity.COMMON, ChatFormatting.WHITE),
@@ -35,20 +33,12 @@ public enum Quality {
         return vanillaRarity;
     }
 
-    /*
-    单色品质的配色；究极由 QualityText 生成彩虹渐变，此处的白色只作兜底
-
-    自带一份而不是去问 Rarity，是因为原版 Rarity 只有一个被弃用的 color 字段，
-    取样式的方法是 Forge 追加的，common 层编译不到。
-    */
+    // 单色品质的配色；究极由 QualityText 生成彩虹渐变，此处的白色只作兜底
     public ChatFormatting color() {
         return color;
     }
 
-    /*
-    其他 Mod 的装备只要用了原版四档稀有度就会在这里被自动识别。
-    传奇以上没有原版对应项，只能通过突破等我方机制获得，不能参与初始品质映射。
-    */
+    // 其他 Mod 的装备只要用了原版四档稀有度就会在这里被自动识别。
     public static Quality fromRarity(Rarity rarity) {
         if (rarity == Rarity.UNCOMMON) {
             return UNCOMMON;
@@ -68,11 +58,7 @@ public enum Quality {
         return ordinal() > EPIC.ordinal();
     }
 
-    /*
-    是否已到最高档
-
-    基于枚举声明顺序推导，不写死档数——后续会新增品质。
-    */
+    // 是否已到最高档
     public boolean isMax() {
         return ordinal() == values().length - 1;
     }
@@ -88,12 +74,7 @@ public enum Quality {
         return quality != null ? quality : COMMON;
     }
 
-    /*
-    严格查找，找不到返回 null
-
-    解析数据包时必须用这个而不是 byId：档位名拼错会被 byId 静默当成普通，
-    作者只会看到数值不对，却查不出哪里写错了。
-    */
+    // 严格查找，找不到返回 null
     public static Quality find(String id) {
         for (Quality quality : values()) {
             if (quality.id.equals(id)) {

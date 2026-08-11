@@ -15,18 +15,10 @@ import net.simplysmith.network.AffixSyncPacket;
 import java.util.List;
 import java.util.function.Supplier;
 
-/*
-Forge 侧的词条表下发
-
-OnDatapackSyncEvent 同时覆盖玩家进服与 /reload 两个时机，不用像 Fabric 那样挂两个事件。
-*/
+// Forge 侧的词条表下发
 public final class ForgeAffixNetwork {
 
-    /*
-    协议版本随载荷结构变动而变
-
-    两端版本对不上时 Forge 会直接拒绝连接，好过让旧客户端按错误的结构解包。
-    */
+    // 协议版本随载荷结构变动而变
     private static final String VERSION = "2";
 
     private static final SimpleChannel CHANNEL = NetworkRegistry.ChannelBuilder
@@ -53,11 +45,7 @@ public final class ForgeAffixNetwork {
         CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), new Message(AffixSyncPacket.snapshot()));
     }
 
-    /*
-    收包只发生在客户端
-
-    内层 lambda 才引用客户端类，专用服务端不会执行外层 Supplier，那个类因此不会被加载。
-    */
+    // 收包只发生在客户端
     private static void handle(Message message, Supplier<NetworkEvent.Context> context) {
         NetworkEvent.Context ctx = context.get();
         ctx.enqueueWork(() -> DistExecutor.unsafeRunWhenOn(Dist.CLIENT,

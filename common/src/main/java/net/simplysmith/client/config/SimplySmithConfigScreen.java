@@ -17,11 +17,7 @@ import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/*
-可选的 Cloth Config 配置页面
-该类只允许在确认 Cloth Config 已加载后引用，核心初始化不能直接触碰它。
-页面只负责编辑现有 SimplySmithConfig，TOML 仍是唯一配置来源。
-*/
+// 可选的 Cloth Config 配置页面
 public final class SimplySmithConfigScreen {
 
     private SimplySmithConfigScreen() {
@@ -123,10 +119,7 @@ public final class SimplySmithConfigScreen {
         ConfigCategory category = builder.getOrCreateCategory(
                 Component.translatable("config.simplysmith.category.affix_base"));
 
-        /*
-        没进世界时数据包词条尚未加载，这里只列得出内置的那些。
-        它们在配置文件中的条目不会因此丢失，重写时会被原样保留。
-        */
+        // 没进世界时数据包词条尚未加载，这里只列得出内置的那些。
         for (Affix affix : Affixes.all()) {
             String key = affix.configKey();
             double currentValue = config.affixBaseValue(key, affix.defaultBaseValue());

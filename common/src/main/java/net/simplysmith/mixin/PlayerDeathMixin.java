@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-// 服务端玩家覆写了 Player#die；必须混入这个实际出口，才能在丢失物品前取消死亡。
+// 在玩家掉落物品前处理不朽
 @Mixin(ServerPlayer.class)
 public abstract class PlayerDeathMixin {
 

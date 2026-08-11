@@ -18,12 +18,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.List;
 
-/*
-物品首次进入背包时初始化
-原版没有能覆盖全部入包路径的事件：拾取、合成产出、容器转移、给予指令、创造模式取物
-走的是各自独立的代码路径。所以改为每 tick 扫一遍背包，只处理尚未初始化盖章的物品。
-
-*/
+// 物品首次进入背包时初始化
 @Mixin(Inventory.class)
 public abstract class InventoryMixin {
 

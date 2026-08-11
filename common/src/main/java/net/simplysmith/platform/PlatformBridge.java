@@ -2,10 +2,7 @@ package net.simplysmith.platform;
 
 import java.nio.file.Path;
 
-/*
-common 层需要、但两端实现不同的能力从这里取，由平台入口在 SimplySmith.init() 之前注入
-不走注解处理器方案是为了不给 common 层引额外依赖
-*/
+// 注入两端不同的平台能力
 public final class PlatformBridge {
 
     // .minecraft/config
@@ -14,7 +11,7 @@ public final class PlatformBridge {
     private PlatformBridge() {
     }
 
-    // Fabric 传 FabricLoader.getConfigDir()，Forge 传 FMLPaths.CONFIGDIR，两者指向同一目录
+    // 初始化平台配置目录
     public static void init(Path gameConfigDir) {
         configDir = gameConfigDir;
     }

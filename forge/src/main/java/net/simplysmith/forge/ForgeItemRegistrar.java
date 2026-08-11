@@ -12,10 +12,7 @@ import net.simplysmith.platform.ItemRegistrar;
 
 import java.util.function.Supplier;
 
-/*
-Forge 侧注册：原版注册表在加载后是冻结的，必须经 DeferredRegister 在注册事件里提交
-所以取值必须推迟到注册完成之后，RegistryObject 正是这个语义
-*/
+// Forge 侧物品注册
 public final class ForgeItemRegistrar implements ItemRegistrar {
 
     private final DeferredRegister<Item> items =

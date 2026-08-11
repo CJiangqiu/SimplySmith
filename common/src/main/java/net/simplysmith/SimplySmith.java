@@ -5,10 +5,7 @@ import net.simplysmith.config.SimplySmithConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/*
-通用层入口，两端的平台入口都调这里
-前提：平台入口必须先调 PlatformBridge.init() 注入配置目录
-*/
+// 通用层入口，两端的平台入口都调这里
 public final class SimplySmith {
 
     // 需与 fabric.mod.json / mods.toml 中的 id 一致

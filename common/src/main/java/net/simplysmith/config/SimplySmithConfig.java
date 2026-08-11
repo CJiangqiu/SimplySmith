@@ -17,15 +17,7 @@ import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/*
-配置读写，对应 .minecraft/config/simplysmith.toml
-
-两端共用同一份实现，所以生成的配置文件在 Fabric 与 Forge 上完全一致。
-不用 Forge 的配置框架是因为那套 API 在 Fabric 端不存在。
-
-加载策略：读到什么用什么，缺失项回落到内置默认值，加载后整份重写——
-新版本新增的配置项会自动补进用户已有的文件，同时保留他们改过的值。
-*/
+// 配置读写，对应 .minecraft/config/simplysmith.toml
 public final class SimplySmithConfig {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SimplySmith.MOD_ID);
@@ -160,13 +152,7 @@ public final class SimplySmithConfig {
             affixBase.put(key, toml.getDouble(SECTION_AFFIX_BASE + "." + key, affix.defaultBaseValue()));
         }
 
-        /*
-        再原样收下文件里我方还不认识的键
-
-        数据包词条要进世界才加载，启动读配置时池子里只有内置那些。不留住这些键的话，
-        用户为数据包词条调过的值会在这次重写里被静默删掉。
-        值写坏的直接跳过而不是记 0，让它回落到 JSON 里声明的基础值。
-        */
+        // 再原样收下文件里我方还不认识的键
         for (String key : toml.keysIn(SECTION_AFFIX_BASE)) {
             if (affixBase.containsKey(key)) {
                 continue;
@@ -192,10 +178,7 @@ public final class SimplySmithConfig {
         sb.append("#本文件在每次启动时重写：新增的配置项会自动补全，你改过的值会保留。\n");
         sb.append("#删除任意一项即可恢复该项的默认值。\n\n");
 
-        /*
-        无段落的键必须写在第一个 [section] 之前，
-        否则解析时会被算进上一个段落里，重启后就读不回来了。
-        */
+        // 无段落键写在首个 section 之前
         sb.append("#Chance that each affix roll is drawn from the item's own category pool\n");
         sb.append("#instead of the whole pool. Generic affixes count toward every category.\n");
         sb.append("#Valid range 0.0 ~ 1.0. Set it to 0 to disable category bias entirely.\n");
@@ -235,12 +218,7 @@ public final class SimplySmithConfig {
         sb.append("#注意：nimble（轻盈）、lifesteal（吸血）、break_army（破军）和 dodge（闪避）是百分比，0.1 表示 10%。\n");
         sb.append('[').append(SECTION_AFFIX_BASE).append("]\n");
 
-        /*
-        先按池子的顺序写已知词条，再把剩下的键补在后面
-
-        补在后面的是我方当前不认识的键——多为尚未加载的数据包词条，也可能来自已卸载的
-        数据包。照原样留住，免得用户调过的值在一次重启后凭空消失。
-        */
+        // 先按池子的顺序写已知词条，再把剩下的键补在后面
         Map<String, Double> remaining = new LinkedHashMap<>(affixBase);
         for (Affix affix : Affixes.all()) {
             String key = affix.configKey();
@@ -295,13 +273,7 @@ public final class SimplySmithConfig {
         return affixMax.getOrDefault(quality, 0);
     }
 
-    /*
-    抽取数量超出池子容量时提醒一句
-
-    放在数据包加载完之后查而不是读配置时查：读配置发生在 mod 初始化阶段，
-    那时数据包还没读，池子里只有内置词条，按那个数报警会误伤。
-    不阻断流程——抽取本来就是先不放回，池子抽干后才兜底重复。
-    */
+    // 抽取数量超出池子容量时提醒一句
     public void warnIfPoolTooSmall(int poolSize) {
         for (Quality quality : Quality.values()) {
             int max = affixMax(quality);

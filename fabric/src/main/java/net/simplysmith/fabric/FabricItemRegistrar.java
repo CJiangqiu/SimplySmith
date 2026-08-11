@@ -10,9 +10,7 @@ import net.simplysmith.platform.ItemRegistrar;
 
 import java.util.function.Supplier;
 
-/*
-Fabric 侧注册：直接写入原版注册表，注册即刻完成
-*/
+// Fabric 侧注册：直接写入原版注册表，注册即刻完成
 public final class FabricItemRegistrar implements ItemRegistrar {
 
     @Override

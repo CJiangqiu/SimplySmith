@@ -13,32 +13,16 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/*
-词条注册表
-统一池：所有词条共用一张表，不按槽位划分适用范围。
-因此会出现一些好玩的情况例如「靴子带攻击力」「剑带护甲」这类组合，这是有意为之的随机性，不是 bug。（别一直给我提相关的issues了QWQ）
-
-内置词条在类加载时静态注册，外部词条由 AffixDataLoader 在每次数据包重载后整批替换。
-*/
+// 词条注册表
 public final class Affixes {
 
     private static final Map<ResourceLocation, Affix> BUILT_IN = new LinkedHashMap<>();
 
-    /*
-    数据包词条与合并后的池子
-
-    重载在服务端线程写、Tooltip 与属性查询在别的线程读，所以整表替换而不是原地改，
-    并用 volatile 保证读到的一定是完整的一版。
-    */
+    // 数据包词条与合并后的池子
     private static volatile Map<ResourceLocation, Affix> dataDriven = Map.of();
     private static volatile List<Affix> pool = List.of();
 
-    /*
-    以上三个字段必须声明在词条常量之前
-
-    静态字段按书写顺序初始化，而每注册一条内置词条都会顺手重建池子，
-    要是把它们挪到常量后面，第一次注册就会读到 null，类加载直接失败。
-    */
+    // 以上三个字段必须声明在词条常量之前
 
     // 强壮：最大生命值提升
     public static final Affix VITALITY = register("vitality", AffixCategory.ARMOR, Attributes.MAX_HEALTH, AttributeModifier.Operation.ADDITION, 2.0D);
@@ -88,6 +72,47 @@ public final class Affixes {
     // 闪避：手持与穿戴装备的概率直接叠加
     public static final Affix DODGE = registerEffect("dodge", Affix.Kind.DODGE, AffixCategory.GENERIC, 0.10D);
 
+    // 神射手：距离越远伤害越高，基础数值为每格的增伤比例
+    public static final Affix SHARPSHOOTER = registerEffect("sharpshooter", Affix.Kind.SHARPSHOOTER, AffixCategory.WEAPON, 0.10D);
+
+    // 背刺：从敌人身后近战时提升伤害
+    public static final Affix BACKSTAB = registerEffect("backstab", Affix.Kind.BACKSTAB, AffixCategory.WEAPON, 2.0D);
+
+    // 夜莺：潜行时真实隐身，攻击时解除隐身并造成额外伤害
+    public static final Affix NIGHTINGALE = registerEffect("nightingale", Affix.Kind.NIGHTINGALE, AffixCategory.WEAPON, 3.0D);
+
+    // 以下六条「附加」都挂在伤害入口上：只要由玩家造成伤害就触发，不限近战或弹射物
+
+    // 火焰附加：使敌人着火，基础数值为秒数
+    public static final Affix FLAME = registerEffect("flame", Affix.Kind.FLAME, AffixCategory.GENERIC, 3.0D);
+
+    // 冰冻附加：使敌人完全冻结，基础数值为秒数
+    public static final Affix FROST = registerEffect("frost", Affix.Kind.FROST, AffixCategory.GENERIC, 3.0D);
+
+    // 雷电附加：召唤仅视觉效果的闪电并造成雷电伤害，基础数值为伤害点数
+    public static final Affix LIGHTNING = registerEffect("lightning", Affix.Kind.LIGHTNING, AffixCategory.GENERIC, 2.0D);
+
+    // 毒素附加：使敌人中毒，基础数值为秒数
+    public static final Affix POISON = registerEffect("poison", Affix.Kind.POISON, AffixCategory.GENERIC, 3.0D);
+
+    // 凋零附加：使敌人凋零，基础数值为秒数
+    public static final Affix WITHER = registerEffect("wither", Affix.Kind.WITHER, AffixCategory.GENERIC, 3.0D);
+
+    // 真伤附加：造成无视一切减免的伤害，基础数值为伤害点数
+    public static final Affix TRUE_DAMAGE = registerEffect("true_damage", Affix.Kind.TRUE_DAMAGE, AffixCategory.GENERIC, 2.0D);
+
+    // 变色龙：站定不动时隐身，一旦位移立即现形
+    public static final Affix CHAMELEON = registerEffect("chameleon", Affix.Kind.CHAMELEON, AffixCategory.ARMOR, 0.0D);
+
+    // 精炼钻头：挖掘等级提升，基础数值为提升的级数
+    public static final Affix REFINED_DRILL = registerEffect("refined_drill", Affix.Kind.MINING_LEVEL, AffixCategory.TOOL, 1.0D);
+
+    // 挖掘机：挖掘速度提升
+    public static final Affix EXCAVATOR = registerEffect("excavator", Affix.Kind.MINING_SPEED, AffixCategory.TOOL, 0.50D);
+
+    // 点石成金：挖掘主世界基岩类方块时概率掉落金粒
+    public static final Affix MIDAS_TOUCH = registerEffect("midas_touch", Affix.Kind.MIDAS_TOUCH, AffixCategory.TOOL, 0.10D);
+
     private Affixes() {
     }
 
@@ -107,24 +132,13 @@ public final class Affixes {
         return affix;
     }
 
-    /*
-    整批替换数据包词条
-
-    服务端由 AffixDataLoader 在每次重载后调用，客户端由 AffixSyncPacket 收包后调用。
-    与内置词条同 id 的定义已在加载阶段被拒绝，这里拿到的一定是不冲突的一批。
-    */
+    // 整批替换数据包词条
     public static void replaceDataDriven(Map<ResourceLocation, Affix> loaded) {
         dataDriven = Map.copyOf(loaded);
         rebuildPool();
     }
 
-    /*
-    合并顺序必须确定
-
-    内置词条按声明序在前，保证配置文件的书写顺序不会因为改了别的东西就抖动；
-    数据包词条按 id 排序在后——它们来自 map，不排序的话遍历顺序随 JVM 而变，
-    会让配置文件每次启动都重排，抽词条的随机结果也无法复现。
-    */
+    // 合并顺序必须确定
     private static void rebuildPool() {
         List<Affix> merged = new ArrayList<>(BUILT_IN.values());
 
@@ -162,12 +176,7 @@ public final class Affixes {
         return byId(parseId(raw));
     }
 
-    /*
-    解析 NBT 里的词条 id，非法返回 null
-
-    旧存档存的是不带命名空间的裸 id，必须显式补上自家命名空间——
-    直接交给 ResourceLocation 会被补成 minecraft:，那样老物品的词条会一次性全部失配。
-    */
+    // 解析 NBT 里的词条 id，非法返回 null
     public static ResourceLocation parseId(String raw) {
         if (raw == null || raw.isEmpty()) {
             return null;

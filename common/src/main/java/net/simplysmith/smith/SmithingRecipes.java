@@ -12,11 +12,7 @@ import net.simplysmith.smith.quality.Quality;
 import java.util.ArrayList;
 import java.util.List;
 
-/*
-铁砧中的强化与突破
-
-判定与产出都在这里，铁砧 mixin 只负责把两个输入槽递进来、把结果填回去。
-*/
+// 铁砧中的强化与突破
 public final class SmithingRecipes {
 
     private SmithingRecipes() {
@@ -27,11 +23,7 @@ public final class SmithingRecipes {
         BREAKTHROUGH
     }
 
-    /*
-    识别这是哪种操作，不匹配返回 null
-
-    要求左槽是已盖章的装备，右槽是对应的石头。
-    */
+    // 识别这是哪种操作，不匹配返回 null
     public static Kind identify(ItemStack gear, ItemStack material) {
         if (gear.isEmpty() || material.isEmpty() || !SmithData.isStamped(gear)) {
             return null;
@@ -45,11 +37,7 @@ public final class SmithingRecipes {
         return null;
     }
 
-    /*
-    产出结果物品，无法执行时返回空
-
-    突破石对已到最高品质的装备无效，此时返回空让铁砧不出结果。
-    */
+    // 产出结果物品，无法执行时返回空
     public static ItemStack assemble(ItemStack gear, Kind kind, RandomSource random) {
         ItemStack result = gear.copy();
 
@@ -69,12 +57,7 @@ public final class SmithingRecipes {
         return result;
     }
 
-    /*
-    突破后补充词条：补到新品质的词条数量上限
-
-    差额 = 新品质上限 - 当前词条数。补充与首次盖章走同一套抽取逻辑，
-    同样按装备分类偏向、同样优先不放回，已有的词条不会被重复抽到。
-    */
+    // 突破后补充词条：补到新品质的词条数量上限
     private static List<Affix> expandAffixes(ItemStack gear, List<Affix> current,
                                              Quality upgraded, RandomSource random) {
         int target = SimplySmithConfig.get().affixMax(upgraded);

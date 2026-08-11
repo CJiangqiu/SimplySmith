@@ -24,12 +24,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/*
-物品上的品质与词条数据，存在 NBT 的 simplysmith 子标签里
-
-子标签存在即视为已盖章，不会被重复处理。
-只挂在堆叠上限为 1 的物品上，不会因为 NBT 差异把原本能堆叠的物品拆开，判据见 isGear。
-*/
+// 物品上的品质与词条数据，存在 NBT 的 simplysmith 子标签里
 public final class SmithData {
 
     private static final String TAG_ROOT = SimplySmith.MOD_ID;
@@ -49,24 +44,9 @@ public final class SmithData {
         return !stack.isEmpty() && !isStamped(stack) && isGear(stack);
     }
 
-    /*
-    是否算作装备
-
-    不能只看耐久：有些 Mod 的工具与武器是无法破坏的，耐久上限为 0 或者干脆重写了
-    掉耐久的方法，只认耐久会把它们整批漏掉。所以下面几条判据取并集，命中任意一条即可。
-
-    标签与基类两条都留着是有原因的：标签能收下不继承原版基类、但正确打了标签的物品；
-    基类能收下没打标签、却确实是那个东西的物品。两边互相补漏，不需要维护白名单，
-    也不需要针对具体 Mod 写适配。
-    */
+    // 是否算作装备
     public static boolean isGear(ItemStack stack) {
-        /*
-        前置：只处理不可堆叠的物品
-
-        盖章要写 NBT，而 NBT 不同的物品无法互相合并。对可堆叠物品盖章会把原本能叠起来的
-        物品拆成一格一个。真正的装备堆叠上限本来就是 1，这条不会误伤，
-        但能挡住雕刻南瓜、生物头颅这类能戴、却堆叠 64 的物品。
-        */
+        // 前置：只处理不可堆叠的物品
         if (stack.getMaxStackSize() != 1) {
             return false;
         }
@@ -96,12 +76,7 @@ public final class SmithData {
         return attackDamage(stack) > 0.0D;
     }
 
-    /*
-    物品自身的主手攻击力
-
-    取的是物品的固有修饰符而不是 ItemStack 上的——后者正是我方注入词条属性的出口，
-    用它会让一件抽到「力量」的物品凭空满足武器判据。
-    */
+    // 物品自身的主手攻击力
     private static double attackDamage(ItemStack stack) {
         double total = 0.0D;
         for (AttributeModifier modifier : stack.getItem()
@@ -113,16 +88,7 @@ public final class SmithData {
         return total;
     }
 
-    /*
-    词条是否在该槽位生效
-
-    只在物品的自然槽位生效，与原版对物品自身属性的处理保持一致：
-    剑与工具只在主手（SwordItem 是 slot == MAINHAND），盔甲只在各自部位
-    （ArmorItem 是 slot == type.getSlot()），盾牌归副手，鞘翅归胸部。
-
-    不这么隔离的话，原版 Tooltip 会因为每个槽位都查到词条而把六个槽位各打印一段，
-    同时玩家还能把盔甲塞进副手再吃一份词条。
-    */
+    // 词条是否在该槽位生效
     public static boolean appliesTo(ItemStack stack, EquipmentSlot slot) {
         return LivingEntity.getEquipmentSlotForItem(stack) == slot;
     }
@@ -169,15 +135,7 @@ public final class SmithData {
         return Quality.byId(root.getString(TAG_QUALITY));
     }
 
-    /*
-    读取词条列表
-
-    读到已被删除或改名的词条 id 时直接跳过，避免旧存档在词条表变动后炸掉；
-    数据包被卸载时同理，物品只是掉词条，不会出问题。
-
-    写出的是带命名空间的完整 id，但读入兼容不带命名空间的写法：
-    旧存档存的就是裸 id，指令和战利品表里手写裸 id 也应当能用。
-    */
+    // 读取词条列表
     public static List<Affix> affixes(ItemStack stack) {
         CompoundTag root = stack.getTagElement(TAG_ROOT);
         if (root == null) {

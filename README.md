@@ -49,6 +49,19 @@ Attribute-affix values are calculated as `base value × quality multiplier × (1
 | Break Army | Weapon | +100% | Increase vanilla critical-hit damage by this percentage. |
 | Immortal | Armor | -1 s | On death, remain at 1 health. Cooldown is 60 seconds minus this value, with a minimum of 1 second. Uses Minecraft's normal item cooldown. |
 | Dodge | Generic | 10% | Values from both hands and all worn armor add together; incoming damage is cancelled on success, capped at 99%. |
+| Flame Infusion | Generic | 3 s | Damaging an enemy sets it on fire for this long. |
+| Frost Infusion | Generic | 3 s | Damaging an enemy freezes it solid for this long. |
+| Lightning Infusion | Generic | 2 | Damaging an enemy calls down a purely visual bolt and deals this much lightning damage. |
+| Poison Infusion | Generic | 3 s | Damaging an enemy applies Poison III for this long. |
+| Wither Infusion | Generic | 3 s | Damaging an enemy applies Wither III for this long. |
+| True Damage Infusion | Generic | 2 | Damaging an enemy deals this much extra true damage. |
+| Sharpshooter | Weapon | +10% | All damage you deal grows by this much per block of distance, counting from 2 blocks out. No distance cap. |
+| Backstab | Weapon | +200% | Melee attacks landed within a 90° arc behind the target's body deal this much extra damage. |
+| Nightingale | Weapon | +300% | Turns truly invisible while sneaking and immediately breaks combat. Attacking adds this much damage, reveals you, and puts the weapon on a fixed 6 second cooldown. |
+| Chameleon | Armor | — | Turns fully invisible while standing still, including armor and held items, and reappears the moment you move. |
+| Refined Drill | Tool | +1 | Raises the tool's mining level by this many tiers. Only applies to blocks that use vanilla tier requirements. |
+| Excavator | Tool | +50% | Increases mining speed by this percentage. |
+| Midas Touch | Tool | 10% | Chance to drop an extra gold nugget when mining stone blocks. Capped at 100%. |
 
 ### Added items
 
@@ -176,6 +189,19 @@ SimplySmith 添加了装备品质、随机词条、强化和品质突破。
 | 破军 | 武器 | +100% | 原版暴击伤害额外提升该百分比。 |
 | 不朽 | 盔甲 | -1 秒 | 死亡时保留 1 点生命；冷却为 60 秒减去该数值，最低 1 秒，使用原版同类物品共享冷却。 |
 | 闪避 | 普通 | 10% | 主手、副手与全部穿戴装备的数值直接相加；成功时取消本次伤害，最高 99%。 |
+| 火焰附加 | 普通 | 3 秒 | 造成伤害时使敌人着火该时长。 |
+| 冰冻附加 | 普通 | 3 秒 | 造成伤害时使敌人完全冻结该时长。 |
+| 雷电附加 | 普通 | 2 | 造成伤害时召唤一道纯视觉的闪电，并造成该点数的雷电伤害。 |
+| 毒素附加 | 普通 | 3 秒 | 造成伤害时使敌人中毒 III，持续该时长。 |
+| 凋零附加 | 普通 | 3 秒 | 造成伤害时使敌人凋零 III，持续该时长。 |
+| 真伤附加 | 普通 | 2 | 造成伤害时额外造成该点数的真实伤害。 |
+| 神射手 | 武器 | +10% | 你造成的一切伤害，从 2 格外开始每格提升该比例，不设距离上限。 |
+| 背刺 | 武器 | +200% | 近战命中目标身体正后方 90 度扇形内时，额外造成该伤害。 |
+| 夜莺 | 武器 | +300% | 潜行时进入真实隐身，立刻脱战；攻击时额外造成该伤害、解除隐身，并使武器进入固定 6 秒冷却。 |
+| 变色龙 | 盔甲 | — | 站定不动时完全隐形，连同盔甲与手持物一并消失，一旦移动立即现形。 |
+| 精炼钻头 | 工具 | +1 | 该工具的挖掘等级提升对应级数，仅对使用原版等级要求的方块生效。 |
+| 挖掘机 | 工具 | +50% | 挖掘速度提升对应百分比。 |
+| 点石成金 | 工具 | 10% | 挖掘石头类方块时，按该概率额外掉落一个金粒，最高 100%。 |
 
 ### 新增物品
 本Mod新增了两种强化物品，均可在创造模式的原材料栏中找到：

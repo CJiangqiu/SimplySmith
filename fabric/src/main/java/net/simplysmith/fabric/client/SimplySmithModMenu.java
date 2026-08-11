@@ -7,10 +7,7 @@ import net.simplysmith.client.config.SimplySmithConfigScreen;
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import com.terraformersmc.modmenu.api.ModMenuApi;
 
-/*
-Mod Menu 可选入口
-Mod Menu 会读取自己的 entrypoint；未安装时 Fabric Loader 不会实例化本类。
-*/
+// Mod Menu 可选入口
 public final class SimplySmithModMenu implements ModMenuApi {
 
     @Override

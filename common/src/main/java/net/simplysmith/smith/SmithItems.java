@@ -10,11 +10,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 
-/*
-本 Mod 注册的物品
-
-注册在平台入口调用 register 时完成，之后才能通过下面的 Supplier 取值。
-*/
+// 本 Mod 注册的物品
 public final class SmithItems {
 
     public static final String ENHANCEMENT_STONE_ID = "enhancement_stone";
@@ -42,12 +38,7 @@ public final class SmithItems {
         return item;
     }
 
-    /*
-    本 Mod 注册的全部物品，供各平台塞进创造模式物品栏
-
-    塞进标签页的动作两端不通用（Forge 走 mod 事件总线的事件，Fabric 走 fabric-api），
-    所以 common 只负责报出有哪些物品，实际挂载在各自平台入口完成。
-    */
+    // 本 Mod 注册的全部物品，供各平台塞进创造模式物品栏
     public static List<Supplier<Item>> all() {
         return Collections.unmodifiableList(ALL);
     }
