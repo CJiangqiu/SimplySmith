@@ -19,6 +19,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -349,7 +350,8 @@ public final class FunctionalAffixEffects {
             }
 
             Brain<?> brain = mob.getBrain();
-            if (brain.getMemory(MemoryModuleType.ATTACK_TARGET).filter(held -> held == player).isPresent()) {
+            if (brain.checkMemory(MemoryModuleType.ATTACK_TARGET, MemoryStatus.REGISTERED)
+                    && brain.getMemory(MemoryModuleType.ATTACK_TARGET).filter(held -> held == player).isPresent()) {
                 brain.eraseMemory(MemoryModuleType.ATTACK_TARGET);
             }
         }
