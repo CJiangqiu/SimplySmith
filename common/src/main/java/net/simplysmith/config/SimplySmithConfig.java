@@ -45,6 +45,14 @@ public final class SimplySmithConfig {
     // 各词条在普通品质下的基础值
     private final Map<String, Double> affixBase = new LinkedHashMap<>();
 
+    /*
+    开关式词条的启用状态
+
+    永恒与变色龙的效果与数值无关，配置项是一个布尔而不是数值，
+    与基础值同处 [affix_base] 段——玩家找某条词条的设置时只需看一个地方。
+    */
+    private final Map<String, Boolean> affixEnabled = new LinkedHashMap<>();
+
     private double categoryBias = DEFAULT_CATEGORY_BIAS;
 
     private SimplySmithConfig() {
@@ -149,12 +157,16 @@ public final class SimplySmithConfig {
         // 已知词条缺项或值写坏时回落各自的内置默认值
         for (Affix affix : Affixes.all()) {
             String key = affix.configKey();
-            affixBase.put(key, toml.getDouble(SECTION_AFFIX_BASE + "." + key, affix.defaultBaseValue()));
+            if (affix.hasValue()) {
+                affixBase.put(key, toml.getDouble(SECTION_AFFIX_BASE + "." + key, affix.defaultBaseValue()));
+            } else {
+                affixEnabled.put(key, toml.getBoolean(SECTION_AFFIX_BASE + "." + key, true));
+            }
         }
 
         // 再原样收下文件里我方还不认识的键
         for (String key : toml.keysIn(SECTION_AFFIX_BASE)) {
-            if (affixBase.containsKey(key)) {
+            if (affixBase.containsKey(key) || affixEnabled.containsKey(key)) {
                 continue;
             }
             double value = toml.getDouble(SECTION_AFFIX_BASE + "." + key, Double.NaN);
@@ -216,15 +228,24 @@ public final class SimplySmithConfig {
         sb.append("#Note: nimble, lifesteal, break_army and dodge are percentages: 0.1 means 10%.\n");
         sb.append("#各词条在「普通」品质下的基础数值。\n");
         sb.append("#注意：nimble（轻盈）、lifesteal（吸血）、break_army（破军）和 dodge（闪避）是百分比，0.1 表示 10%。\n");
+        sb.append("#Switch-style affixes take true/false instead of a number: false disables them entirely.\n");
+        sb.append("#开关式词条填 true/false 而不是数值，填 false 即完全停用该词条。\n");
         sb.append('[').append(SECTION_AFFIX_BASE).append("]\n");
 
         // 先按池子的顺序写已知词条，再把剩下的键补在后面
         Map<String, Double> remaining = new LinkedHashMap<>(affixBase);
         for (Affix affix : Affixes.all()) {
             String key = affix.configKey();
+            sb.append(Toml.quoteIfNeeded(key)).append(" = ");
+
+            // 开关式词条写布尔，其余写数值
+            if (!affix.hasValue()) {
+                sb.append(affixEnabled.getOrDefault(key, true)).append('\n');
+                continue;
+            }
+
             Double value = remaining.remove(key);
-            sb.append(Toml.quoteIfNeeded(key)).append(" = ")
-                    .append(value != null ? value : affix.defaultBaseValue()).append('\n');
+            sb.append(value != null ? value : affix.defaultBaseValue()).append('\n');
         }
         remaining.forEach((key, value) ->
                 sb.append(Toml.quoteIfNeeded(key)).append(" = ").append(value).append('\n'));
@@ -302,5 +323,14 @@ public final class SimplySmithConfig {
     // 配置中缺失时回落到传入的默认值
     public double affixBaseValue(String affixId, double fallback) {
         return affixBase.getOrDefault(affixId, fallback);
+    }
+
+    // 只有开关式词条会有条目，其余词条恒为启用
+    public boolean affixEnabled(String affixId) {
+        return affixEnabled.getOrDefault(affixId, true);
+    }
+
+    public void setAffixEnabled(String affixId, boolean enabled) {
+        affixEnabled.put(affixId, enabled);
     }
 }

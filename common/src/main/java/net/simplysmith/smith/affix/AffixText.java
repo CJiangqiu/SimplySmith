@@ -22,8 +22,8 @@ public final class AffixText {
     public static Component value(Affix affix, Quality quality, int level) {
         double shown = affix.valueFor(quality, level);
 
-        // 没有数值可讲的词条不给数字，描述文本里也不写 %s
-        if (affix.kind() == Affix.Kind.ETERNAL || affix.kind() == Affix.Kind.CHAMELEON) {
+        // 开关式词条没有数字可讲，描述文本里也不写 %s
+        if (!affix.hasValue()) {
             return Component.empty();
         }
 

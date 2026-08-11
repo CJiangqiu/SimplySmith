@@ -80,6 +80,6 @@
   "config.simplysmith.affix_category.bias.tooltip": "每次抽取词条时，从该装备所属分类的池子中抽取的概率，未命中则从全池抽取。普通分类的词条计入所有装备的分类池。填 0 即完全关闭分类偏向。",
   "config.simplysmith.affix_count.min": "%s：最少词条数",
   "config.simplysmith.affix_count.max": "%s：最多词条数",
-  "jei.simplysmith.enhancement_stone.info": "在铁砧上把装备放左槽、强化石放右槽，即可提升强化等级。每次消耗 1 个强化石，不消耗经验等级。强化会让装备上的全部词条同时提升一级，等级没有上限。词条在装备首次进入背包时随机抽取，强化不会改变词条本身。",
-  "jei.simplysmith.breakthrough_stone.info": "在铁砧上把装备放左槽、突破石放右槽，即可把品质提升一档。每次消耗 1 个突破石，不消耗经验等级。突破后会按新品质的词条数量上限补充词条。已达最高品质的装备无法继续突破，铁砧不会给出结果。"
+  "jei.simplysmith.enhancement_stone.info": "在铁砧中使用，使装备的强化等级提升一级，并提高全部词条的效果。",
+  "jei.simplysmith.breakthrough_stone.info": "在铁砧中使用，使装备的品质提升一档，并补充词条，最高品质无法继续突破。"
 }

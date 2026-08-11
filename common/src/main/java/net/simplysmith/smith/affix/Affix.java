@@ -55,6 +55,7 @@ public final class Affix {
     // 服务端下发的实际数值，只有连远程服务器的客户端才会被赋值
     private volatile Double serverBaseValue;
     private volatile Map<Quality, Double> serverQualityMultipliers;
+    private volatile Boolean serverEnabled;
 
     // 按槽位区分修饰符 UUID
     private final Map<EquipmentSlot, UUID> modifierIds = new EnumMap<>(EquipmentSlot.class);
@@ -115,6 +116,22 @@ public final class Affix {
         return category;
     }
 
+    /*
+    这条词条有没有可调的数值
+
+    永恒与变色龙是开关式的，效果与数值无关。它们在配置里是一个布尔开关而不是数值，
+    Tooltip 上也不显示数字。
+    */
+    public boolean hasValue() {
+        return kind != Kind.ETERNAL && kind != Kind.CHAMELEON;
+    }
+
+    // 关掉的词条不参与抽取，已在物品上的也不再生效、不再显示
+    public boolean isEnabled() {
+        Boolean fromServer = serverEnabled;
+        return fromServer != null ? fromServer : SimplySmithConfig.get().affixEnabled(configKey());
+    }
+
     // 该词条是否落在这件装备的偏向池里
     public boolean isFavoredBy(AffixCategory itemCategory) {
         return category == itemCategory || category == AffixCategory.GENERIC;
@@ -160,15 +177,17 @@ public final class Affix {
     }
 
     // 应用服务端下发的最终数值
-    public void applyServerValues(double baseValue, Map<Quality, Double> multipliers) {
+    public void applyServerValues(double baseValue, Map<Quality, Double> multipliers, boolean enabled) {
         serverBaseValue = baseValue;
         serverQualityMultipliers = multipliers.isEmpty() ? null : new EnumMap<>(multipliers);
+        serverEnabled = enabled;
     }
 
     // 断开连接后恢复读本地配置
     public void clearServerValues() {
         serverBaseValue = null;
         serverQualityMultipliers = null;
+        serverEnabled = null;
     }
 
     // 实际数值 = 基础值 × 品质倍率 × (1 + 强化等级)

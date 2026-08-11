@@ -40,14 +40,16 @@ public final class AffixRoller {
         }
 
         double bias = SimplySmithConfig.get().categoryBias();
-        List<Affix> pool = new ArrayList<>(Affixes.all());
+        List<Affix> available = enabledAffixes();
+
+        List<Affix> pool = new ArrayList<>(available);
         pool.removeAll(exclude);
 
         List<Affix> result = new ArrayList<>(count);
         while (result.size() < count) {
             if (pool.isEmpty()) {
                 // 池子抽干，重新装填以兜底重复
-                pool.addAll(Affixes.all());
+                pool.addAll(available);
                 if (pool.isEmpty()) {
                     break;
                 }
@@ -59,6 +61,17 @@ public final class AffixRoller {
             result.add(picked);
         }
         return result;
+    }
+
+    // 被配置关掉的词条不参与抽取，新物品不会再拿到它们
+    private static List<Affix> enabledAffixes() {
+        List<Affix> enabled = new ArrayList<>(Affixes.size());
+        for (Affix affix : Affixes.all()) {
+            if (affix.isEnabled()) {
+                enabled.add(affix);
+            }
+        }
+        return enabled;
     }
 
     // 单次抽取

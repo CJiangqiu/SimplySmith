@@ -19,7 +19,7 @@ import java.util.function.Supplier;
 public final class ForgeAffixNetwork {
 
     // 协议版本随载荷结构变动而变
-    private static final String VERSION = "2";
+    private static final String VERSION = "3";
 
     private static final SimpleChannel CHANNEL = NetworkRegistry.ChannelBuilder
             .named(AffixSyncPacket.CHANNEL)

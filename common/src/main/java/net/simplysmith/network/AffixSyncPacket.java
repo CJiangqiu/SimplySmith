@@ -34,7 +34,7 @@ public final class AffixSyncPacket {
     // 单条词条的下发内容
     public record Entry(ResourceLocation id, Affix.Kind kind, AffixCategory category,
                         ResourceLocation attribute, AttributeModifier.Operation operation,
-                        double baseValue, Map<Quality, Double> qualityMultipliers) {
+                        double baseValue, Map<Quality, Double> qualityMultipliers, boolean enabled) {
     }
 
     // 在服务端把当前整张词条表拍成快照
@@ -53,7 +53,7 @@ public final class AffixSyncPacket {
                     : null;
 
             entries.add(new Entry(affix.id(), affix.kind(), affix.category(), attribute,
-                    affix.operation(), affix.baseValue(), multipliers));
+                    affix.operation(), affix.baseValue(), multipliers, affix.isEnabled()));
         }
         return entries;
     }
@@ -73,6 +73,7 @@ public final class AffixSyncPacket {
             }
 
             // 品质倍率按 Quality 声明序写满，省掉一份档位名，也免得漏档
+            buf.writeBoolean(entry.enabled());
             buf.writeDouble(entry.baseValue());
             for (Quality quality : Quality.values()) {
                 buf.writeDouble(entry.qualityMultipliers().get(quality));
@@ -97,13 +98,14 @@ public final class AffixSyncPacket {
                 operation = buf.readEnum(AttributeModifier.Operation.class);
             }
 
+            boolean enabled = buf.readBoolean();
             double baseValue = buf.readDouble();
             Map<Quality, Double> multipliers = new EnumMap<>(Quality.class);
             for (Quality quality : Quality.values()) {
                 multipliers.put(quality, buf.readDouble());
             }
 
-            entries.add(new Entry(id, kind, category, attribute, operation, baseValue, multipliers));
+            entries.add(new Entry(id, kind, category, attribute, operation, baseValue, multipliers, enabled));
         }
         return entries;
     }
@@ -114,7 +116,7 @@ public final class AffixSyncPacket {
 
         for (Entry entry : entries) {
             if (Affixes.isBuiltIn(entry.id())) {
-                Affixes.byId(entry.id()).applyServerValues(entry.baseValue(), entry.qualityMultipliers());
+                Affixes.byId(entry.id()).applyServerValues(entry.baseValue(), entry.qualityMultipliers(), entry.enabled());
                 continue;
             }
 
@@ -137,7 +139,7 @@ public final class AffixSyncPacket {
 
             Affix affix = new Affix(entry.id(), entry.category(), attribute, entry.operation(),
                     entry.baseValue(), entry.qualityMultipliers());
-            affix.applyServerValues(entry.baseValue(), entry.qualityMultipliers());
+            affix.applyServerValues(entry.baseValue(), entry.qualityMultipliers(), entry.enabled());
             rebuilt.put(entry.id(), affix);
         }
 

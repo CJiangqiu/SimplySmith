@@ -8,10 +8,10 @@
   ],
   "key": {
     "G": {
-      "item": "minecraft:gold_nugget"
+      "item": "minecraft:gold_ingot"
     },
     "N": {
-      "item": "minecraft:iron_nugget"
+      "item": "minecraft:iron_ingot"
     },
     "C": {
       "item": "minecraft:cobblestone"

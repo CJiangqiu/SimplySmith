@@ -132,10 +132,17 @@ public final class SmithData {
             return Collections.emptyList();
         }
 
+        /*
+        被配置关掉的词条一并跳过
+
+        这是读取物品词条的唯一出口，属性注入、效果结算与 Tooltip 都经过它，
+        所以在这里拦一次就等于「关了就彻底不生效、也不显示」。
+        NBT 本身不动，重新开启后原来的词条照旧回来。
+        */
         List<Affix> result = new ArrayList<>(list.size());
         for (int i = 0; i < list.size(); i++) {
             Affix affix = Affixes.byId(list.getString(i));
-            if (affix != null) {
+            if (affix != null && affix.isEnabled()) {
                 result.add(affix);
             }
         }

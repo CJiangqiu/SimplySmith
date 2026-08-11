@@ -80,6 +80,6 @@
   "config.simplysmith.affix_category.bias.tooltip": "Chance that each affix roll is drawn from the item's own category pool instead of the whole pool. Generic affixes count toward every category. Set it to 0 to disable category bias entirely.",
   "config.simplysmith.affix_count.min": "%s: Minimum Affixes",
   "config.simplysmith.affix_count.max": "%s: Maximum Affixes",
-  "jei.simplysmith.enhancement_stone.info": "Place the gear in the left anvil slot and an Enhancement Stone in the right slot to raise its enhancement level. Each use consumes 1 Enhancement Stone and costs no experience levels. Enhancing raises every affix on the gear by one level at once, with no level cap. Affixes are rolled when the gear first enters your inventory; enhancing does not change which affixes it has.",
-  "jei.simplysmith.breakthrough_stone.info": "Place the gear in the left anvil slot and a Breakthrough Stone in the right slot to raise its quality by one tier. Each use consumes 1 Breakthrough Stone and costs no experience levels. A breakthrough tops the gear up to the affix count of its new quality. Gear already at the highest quality cannot break through, and the anvil produces no result."
+  "jei.simplysmith.enhancement_stone.info": "Use in an anvil to raise the gear's enhancement level by one and improve all of its affixes.",
+  "jei.simplysmith.breakthrough_stone.info": "Use in an anvil to raise the gear's quality by one tier and add affixes; gear at the highest quality cannot break through."
 }
