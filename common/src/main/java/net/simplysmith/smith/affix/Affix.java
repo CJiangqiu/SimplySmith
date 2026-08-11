@@ -36,6 +36,7 @@ public final class Affix {
 
     private final ResourceLocation id;
     private final Kind kind;
+    private final AffixCategory category;
     private final Attribute attribute;
     private final AttributeModifier.Operation operation;
     private final double defaultBaseValue;
@@ -69,25 +70,30 @@ public final class Affix {
     */
     private final Map<EquipmentSlot, UUID> modifierIds = new EnumMap<>(EquipmentSlot.class);
 
-    Affix(String path, Attribute attribute, AttributeModifier.Operation operation, double defaultBaseValue) {
-        this(new ResourceLocation(SimplySmith.MOD_ID, path), Kind.ATTRIBUTE,
+    Affix(String path, AffixCategory category, Attribute attribute,
+          AttributeModifier.Operation operation, double defaultBaseValue) {
+        this(new ResourceLocation(SimplySmith.MOD_ID, path), Kind.ATTRIBUTE, category,
                 attribute, operation, defaultBaseValue, Map.of());
     }
 
-    Affix(String path, Kind kind, double defaultBaseValue) {
-        this(new ResourceLocation(SimplySmith.MOD_ID, path), kind, null, null, defaultBaseValue, Map.of());
+    Affix(String path, Kind kind, AffixCategory category, double defaultBaseValue) {
+        this(new ResourceLocation(SimplySmith.MOD_ID, path), kind, category,
+                null, null, defaultBaseValue, Map.of());
     }
 
     // 数据包定义与服务端下发的词条都走这个入口
-    public Affix(ResourceLocation id, Attribute attribute, AttributeModifier.Operation operation,
-                 double defaultBaseValue, Map<Quality, Double> qualityMultipliers) {
-        this(id, Kind.ATTRIBUTE, attribute, operation, defaultBaseValue, qualityMultipliers);
+    public Affix(ResourceLocation id, AffixCategory category, Attribute attribute,
+                 AttributeModifier.Operation operation, double defaultBaseValue,
+                 Map<Quality, Double> qualityMultipliers) {
+        this(id, Kind.ATTRIBUTE, category, attribute, operation, defaultBaseValue, qualityMultipliers);
     }
 
-    private Affix(ResourceLocation id, Kind kind, Attribute attribute, AttributeModifier.Operation operation,
-                  double defaultBaseValue, Map<Quality, Double> qualityMultipliers) {
+    private Affix(ResourceLocation id, Kind kind, AffixCategory category, Attribute attribute,
+                  AttributeModifier.Operation operation, double defaultBaseValue,
+                  Map<Quality, Double> qualityMultipliers) {
         this.id = id;
         this.kind = kind;
+        this.category = category;
         this.attribute = attribute;
         this.operation = operation;
         this.defaultBaseValue = defaultBaseValue;
@@ -119,6 +125,19 @@ public final class Affix {
 
     public Kind kind() {
         return kind;
+    }
+
+    public AffixCategory category() {
+        return category;
+    }
+
+    /*
+    该词条是否落在这件装备的偏向池里
+
+    普通是中立分类，并进每一件装备的偏向池；因此普通物品的偏向池就只有普通词条。
+    */
+    public boolean isFavoredBy(AffixCategory itemCategory) {
+        return category == itemCategory || category == AffixCategory.GENERIC;
     }
 
     public boolean isAttribute() {

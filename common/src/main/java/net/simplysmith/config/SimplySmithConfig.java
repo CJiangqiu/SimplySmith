@@ -36,9 +36,13 @@ public final class SimplySmithConfig {
 
     private static final String FILE_NAME = SimplySmith.MOD_ID + ".toml";
 
+    // 抽词条时偏向该装备所属分类的概率
+    public static final double DEFAULT_CATEGORY_BIAS = 0.5D;
+
     private static final String SECTION_AFFIX_COUNT = "affix_count";
     private static final String SECTION_QUALITY_MULTIPLIER = "quality_multiplier";
     private static final String SECTION_AFFIX_BASE = "affix_base";
+    private static final String KEY_CATEGORY_BIAS = "category_bias";
 
     private static SimplySmithConfig instance = new SimplySmithConfig();
 
@@ -48,6 +52,8 @@ public final class SimplySmithConfig {
 
     // 各词条在普通品质下的基础值
     private final Map<String, Double> affixBase = new LinkedHashMap<>();
+
+    private double categoryBias = DEFAULT_CATEGORY_BIAS;
 
     private SimplySmithConfig() {
         applyDefaults();
@@ -126,6 +132,9 @@ public final class SimplySmithConfig {
     }
 
     private void readFrom(Toml toml) {
+        // 概率，超出 0~1 会被截断
+        categoryBias = Math.max(0.0D, Math.min(1.0D, toml.getDouble(KEY_CATEGORY_BIAS, categoryBias)));
+
         for (Quality quality : Quality.values()) {
             int min = toml.getInt(SECTION_AFFIX_COUNT + "." + quality.id() + "_min", affixMin.get(quality));
             int max = toml.getInt(SECTION_AFFIX_COUNT + "." + quality.id() + "_max", affixMax.get(quality));
@@ -182,6 +191,18 @@ public final class SimplySmithConfig {
         sb.append("#SimplySmith 配置文件\n");
         sb.append("#本文件在每次启动时重写：新增的配置项会自动补全，你改过的值会保留。\n");
         sb.append("#删除任意一项即可恢复该项的默认值。\n\n");
+
+        /*
+        无段落的键必须写在第一个 [section] 之前，
+        否则解析时会被算进上一个段落里，重启后就读不回来了。
+        */
+        sb.append("#Chance that each affix roll is drawn from the item's own category pool\n");
+        sb.append("#instead of the whole pool. Generic affixes count toward every category.\n");
+        sb.append("#Valid range 0.0 ~ 1.0. Set it to 0 to disable category bias entirely.\n");
+        sb.append("#每次抽取词条时，从该装备所属分类的池子中抽取的概率，未命中则从全池抽取。\n");
+        sb.append("#普通分类的词条计入所有装备的分类池。\n");
+        sb.append("#合法范围 0.0 ~ 1.0，填 0 即完全关闭分类偏向。\n");
+        sb.append(KEY_CATEGORY_BIAS).append(" = ").append(categoryBias).append("\n\n");
 
         sb.append("#Number of affixes rolled for each quality, picked at random within min~max.\n");
         sb.append("#Valid range ").append(MIN_AFFIX_COUNT).append(" ~ ").append(MAX_AFFIX_COUNT)
@@ -294,6 +315,16 @@ public final class SimplySmithConfig {
 
     public double qualityMultiplier(Quality quality) {
         return qualityMultiplier.getOrDefault(quality, 1.0D);
+    }
+
+    public double categoryBias() {
+        return categoryBias;
+    }
+
+    public void setCategoryBias(double bias) {
+        if (Double.isFinite(bias)) {
+            categoryBias = Math.max(0.0D, Math.min(1.0D, bias));
+        }
     }
 
     // 配置中缺失时回落到传入的默认值

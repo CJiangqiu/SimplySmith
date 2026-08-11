@@ -39,6 +39,7 @@ import java.util.Map;
   attribute          必填，属性的注册 id
   operation          可选，addition / multiply_base / multiply_total，默认 addition
   base_value         必填，普通品质下的基础值
+  category           可选，weapon / tool / armor / generic，默认 generic
   quality_multiplier 可选，品质倍率覆盖表，可只写部分档，没写的档回落全局配置
 
 单个文件出错只跳过该文件并打日志，不中断整次重载，
@@ -89,6 +90,7 @@ public class AffixDataLoader extends SimpleJsonResourceReloadListener {
     private static Affix parse(ResourceLocation id, JsonObject json) {
         Attribute attribute = readAttribute(json);
         AttributeModifier.Operation operation = readOperation(json);
+        AffixCategory category = readCategory(json);
 
         double baseValue = GsonHelper.getAsDouble(json, "base_value");
         if (!Double.isFinite(baseValue)) {
@@ -108,7 +110,19 @@ public class AffixDataLoader extends SimpleJsonResourceReloadListener {
                     id, BuiltInRegistries.ATTRIBUTE.getKey(attribute));
         }
 
-        return new Affix(id, attribute, operation, baseValue, readQualityMultipliers(json));
+        return new Affix(id, category, attribute, operation, baseValue, readQualityMultipliers(json));
+    }
+
+    // 不写就是普通，即对任何装备都算在偏向池里
+    private static AffixCategory readCategory(JsonObject json) {
+        String raw = GsonHelper.getAsString(json, "category", AffixCategory.GENERIC.id());
+
+        AffixCategory category = AffixCategory.find(raw);
+        if (category == null) {
+            throw new IllegalArgumentException(
+                    "Unknown category '" + raw + "', expected weapon, tool, armor or generic");
+        }
+        return category;
     }
 
     private static Attribute readAttribute(JsonObject json) {

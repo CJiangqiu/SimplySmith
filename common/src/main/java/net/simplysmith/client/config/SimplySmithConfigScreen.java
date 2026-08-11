@@ -38,10 +38,13 @@ public final class SimplySmithConfigScreen {
         Map<Quality, Integer> affixMax = new EnumMap<>(Quality.class);
         Map<Quality, Double> multipliers = new EnumMap<>(Quality.class);
         Map<String, Double> affixBaseValues = new LinkedHashMap<>();
+        // 单值项，用一格数组在 lambda 之间传递
+        double[] categoryBias = { config.categoryBias() };
 
         addAffixCountEntries(builder, entries, config, affixMin, affixMax);
         addQualityMultiplierEntries(builder, entries, config, multipliers);
         addAffixBaseEntries(builder, entries, config, affixBaseValues);
+        addCategoryBiasEntry(builder, entries, config, categoryBias);
 
         builder.setSavingRunnable(() -> {
             for (Quality quality : Quality.values()) {
@@ -49,9 +52,25 @@ public final class SimplySmithConfigScreen {
                 config.setQualityMultiplier(quality, multipliers.get(quality));
             }
             affixBaseValues.forEach(config::setAffixBaseValue);
+            config.setCategoryBias(categoryBias[0]);
             config.save();
         });
         return builder.build();
+    }
+
+    private static void addCategoryBiasEntry(ConfigBuilder builder, ConfigEntryBuilder entries,
+                                             SimplySmithConfig config, double[] categoryBias) {
+        ConfigCategory category = builder.getOrCreateCategory(
+                Component.translatable("config.simplysmith.category.affix_category"));
+
+        category.addEntry(entries.startDoubleField(
+                        Component.translatable("config.simplysmith.affix_category.bias"), categoryBias[0])
+                .setDefaultValue(SimplySmithConfig.DEFAULT_CATEGORY_BIAS)
+                .setMin(0.0D)
+                .setMax(1.0D)
+                .setTooltip(Component.translatable("config.simplysmith.affix_category.bias.tooltip"))
+                .setSaveConsumer(value -> categoryBias[0] = value)
+                .build());
     }
 
     private static void addAffixCountEntries(ConfigBuilder builder, ConfigEntryBuilder entries,

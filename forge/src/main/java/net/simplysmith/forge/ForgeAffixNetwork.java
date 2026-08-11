@@ -27,7 +27,7 @@ public final class ForgeAffixNetwork {
 
     两端版本对不上时 Forge 会直接拒绝连接，好过让旧客户端按错误的结构解包。
     */
-    private static final String VERSION = "1";
+    private static final String VERSION = "2";
 
     private static final SimpleChannel CHANNEL = NetworkRegistry.ChannelBuilder
             .named(AffixSyncPacket.CHANNEL)

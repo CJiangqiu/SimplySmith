@@ -8,6 +8,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 
 import net.simplysmith.SimplySmith;
 import net.simplysmith.smith.affix.Affix;
+import net.simplysmith.smith.affix.AffixCategory;
 import net.simplysmith.smith.affix.Affixes;
 import net.simplysmith.smith.quality.Quality;
 
@@ -46,9 +47,9 @@ public final class AffixSyncPacket {
     attribute 与 operation 只有属性型词条才有；功能型词条的行为写在 Java 里，
     两端各自都有，这里只需要把数值对齐。
     */
-    public record Entry(ResourceLocation id, Affix.Kind kind, ResourceLocation attribute,
-                        AttributeModifier.Operation operation, double baseValue,
-                        Map<Quality, Double> qualityMultipliers) {
+    public record Entry(ResourceLocation id, Affix.Kind kind, AffixCategory category,
+                        ResourceLocation attribute, AttributeModifier.Operation operation,
+                        double baseValue, Map<Quality, Double> qualityMultipliers) {
     }
 
     /*
@@ -70,8 +71,8 @@ public final class AffixSyncPacket {
                     ? BuiltInRegistries.ATTRIBUTE.getKey(affix.attribute())
                     : null;
 
-            entries.add(new Entry(affix.id(), affix.kind(), attribute, affix.operation(),
-                    affix.baseValue(), multipliers));
+            entries.add(new Entry(affix.id(), affix.kind(), affix.category(), attribute,
+                    affix.operation(), affix.baseValue(), multipliers));
         }
         return entries;
     }
@@ -82,6 +83,7 @@ public final class AffixSyncPacket {
         for (Entry entry : entries) {
             buf.writeResourceLocation(entry.id());
             buf.writeEnum(entry.kind());
+            buf.writeEnum(entry.category());
 
             buf.writeBoolean(entry.attribute() != null);
             if (entry.attribute() != null) {
@@ -110,6 +112,7 @@ public final class AffixSyncPacket {
         for (int i = 0; i < count; i++) {
             ResourceLocation id = buf.readResourceLocation();
             Affix.Kind kind = buf.readEnum(Affix.Kind.class);
+            AffixCategory category = buf.readEnum(AffixCategory.class);
 
             ResourceLocation attribute = null;
             AttributeModifier.Operation operation = null;
@@ -124,7 +127,7 @@ public final class AffixSyncPacket {
                 multipliers.put(quality, buf.readDouble());
             }
 
-            entries.add(new Entry(id, kind, attribute, operation, baseValue, multipliers));
+            entries.add(new Entry(id, kind, category, attribute, operation, baseValue, multipliers));
         }
         return entries;
     }
@@ -169,7 +172,7 @@ public final class AffixSyncPacket {
                 continue;
             }
 
-            Affix affix = new Affix(entry.id(), attribute, entry.operation(),
+            Affix affix = new Affix(entry.id(), entry.category(), attribute, entry.operation(),
                     entry.baseValue(), entry.qualityMultipliers());
             affix.applyServerValues(entry.baseValue(), entry.qualityMultipliers());
             rebuilt.put(entry.id(), affix);

@@ -4,9 +4,16 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.item.DiggerItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ProjectileWeaponItem;
+import net.minecraft.world.item.SwordItem;
 
 import net.simplysmith.SimplySmith;
 import net.simplysmith.smith.affix.Affix;
@@ -21,7 +28,7 @@ import java.util.List;
 物品上的品质与词条数据，存在 NBT 的 simplysmith 子标签里
 
 子标签存在即视为已盖章，不会被重复处理。
-只挂在可损坏物品上，这类物品堆叠上限恒为 1，不会因为 NBT 差异把原本能堆叠的物品拆开。
+只挂在堆叠上限为 1 的物品上，不会因为 NBT 差异把原本能堆叠的物品拆开，判据见 isGear。
 */
 public final class SmithData {
 
@@ -38,14 +45,72 @@ public final class SmithData {
         return stack.getTagElement(TAG_ROOT) != null;
     }
 
-    /*
-    能否盖章：可损坏物品即视为装备
-
-    isDamageableItem 覆盖工具、武器、盔甲、盾牌等，其他 Mod 的装备同样满足，
-    不需要维护白名单。无耐久物品与标记了 Unbreakable 的物品会被自然排除。
-    */
     public static boolean canStamp(ItemStack stack) {
-        return !stack.isEmpty() && stack.isDamageableItem() && !isStamped(stack);
+        return !stack.isEmpty() && !isStamped(stack) && isGear(stack);
+    }
+
+    /*
+    是否算作装备
+
+    不能只看耐久：有些 Mod 的工具与武器是无法破坏的，耐久上限为 0 或者干脆重写了
+    掉耐久的方法，只认耐久会把它们整批漏掉。所以下面几条判据取并集，命中任意一条即可。
+
+    标签与基类两条都留着是有原因的：标签能收下不继承原版基类、但正确打了标签的物品；
+    基类能收下没打标签、却确实是那个东西的物品。两边互相补漏，不需要维护白名单，
+    也不需要针对具体 Mod 写适配。
+    */
+    public static boolean isGear(ItemStack stack) {
+        /*
+        前置：只处理不可堆叠的物品
+
+        盖章要写 NBT，而 NBT 不同的物品无法互相合并。对可堆叠物品盖章会把原本能叠起来的
+        物品拆成一格一个。真正的装备堆叠上限本来就是 1，这条不会误伤，
+        但能挡住雕刻南瓜、生物头颅这类能戴、却堆叠 64 的物品。
+        */
+        if (stack.getMaxStackSize() != 1) {
+            return false;
+        }
+
+        // 有耐久的一律算，这条覆盖面最广
+        if (stack.getMaxDamage() > 0) {
+            return true;
+        }
+
+        // 能穿戴的：盔甲、鞘翅归各自部位，盾牌归副手，都不是主手
+        if (LivingEntity.getEquipmentSlotForItem(stack) != EquipmentSlot.MAINHAND) {
+            return true;
+        }
+
+        Item item = stack.getItem();
+        if (item instanceof SwordItem || item instanceof DiggerItem
+                || item instanceof ProjectileWeaponItem) {
+            return true;
+        }
+
+        if (stack.is(ItemTags.SWORDS) || stack.is(ItemTags.TOOLS)
+                || stack.is(ItemTags.TRIMMABLE_ARMOR)) {
+            return true;
+        }
+
+        // 兜底：主手能打出伤害的就算武器，收下不继承原版基类也没打标签的那些
+        return attackDamage(stack) > 0.0D;
+    }
+
+    /*
+    物品自身的主手攻击力
+
+    取的是物品的固有修饰符而不是 ItemStack 上的——后者正是我方注入词条属性的出口，
+    用它会让一件抽到「力量」的物品凭空满足武器判据。
+    */
+    private static double attackDamage(ItemStack stack) {
+        double total = 0.0D;
+        for (AttributeModifier modifier : stack.getItem()
+                .getDefaultAttributeModifiers(EquipmentSlot.MAINHAND).get(Attributes.ATTACK_DAMAGE)) {
+            if (modifier.getOperation() == AttributeModifier.Operation.ADDITION) {
+                total += modifier.getAmount();
+            }
+        }
+        return total;
     }
 
     /*

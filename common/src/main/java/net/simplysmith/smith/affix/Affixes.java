@@ -41,63 +41,64 @@ public final class Affixes {
     */
 
     // 强壮：最大生命值提升
-    public static final Affix VITALITY = register("vitality", Attributes.MAX_HEALTH, AttributeModifier.Operation.ADDITION, 2.0D);
+    public static final Affix VITALITY = register("vitality", AffixCategory.ARMOR, Attributes.MAX_HEALTH, AttributeModifier.Operation.ADDITION, 2.0D);
 
     // 磐石：击退抗性提升
-    public static final Affix STEADFAST = register("steadfast", Attributes.KNOCKBACK_RESISTANCE, AttributeModifier.Operation.ADDITION, 0.05D);
+    public static final Affix STEADFAST = register("steadfast", AffixCategory.ARMOR, Attributes.KNOCKBACK_RESISTANCE, AttributeModifier.Operation.ADDITION, 0.05D);
 
     // 坚固：护甲提升
-    public static final Affix STURDY = register("sturdy", Attributes.ARMOR, AttributeModifier.Operation.ADDITION, 2.0D);
+    public static final Affix STURDY = register("sturdy", AffixCategory.ARMOR, Attributes.ARMOR, AttributeModifier.Operation.ADDITION, 2.0D);
 
     // 坚韧：护甲韧性提升
-    public static final Affix TENACITY = register("tenacity", Attributes.ARMOR_TOUGHNESS, AttributeModifier.Operation.ADDITION, 2.0D);
+    public static final Affix TENACITY = register("tenacity", AffixCategory.ARMOR, Attributes.ARMOR_TOUGHNESS, AttributeModifier.Operation.ADDITION, 2.0D);
 
     //轻盈：速度提升
-    public static final Affix NIMBLE = register("nimble", Attributes.MOVEMENT_SPEED, AttributeModifier.Operation.MULTIPLY_BASE, 0.10D);
+    public static final Affix NIMBLE = register("nimble", AffixCategory.GENERIC, Attributes.MOVEMENT_SPEED, AttributeModifier.Operation.MULTIPLY_BASE, 0.10D);
 
     // 力量：攻击力提升
-    public static final Affix STRENGTH = register("strength", Attributes.ATTACK_DAMAGE, AttributeModifier.Operation.ADDITION, 1.0D);
+    public static final Affix STRENGTH = register("strength", AffixCategory.WEAPON, Attributes.ATTACK_DAMAGE, AttributeModifier.Operation.ADDITION, 1.0D);
 
     // 狂暴：攻击速度提升
-    public static final Affix FRENZY = register("frenzy", Attributes.ATTACK_SPEED, AttributeModifier.Operation.ADDITION, 0.1D);
+    public static final Affix FRENZY = register("frenzy", AffixCategory.WEAPON, Attributes.ATTACK_SPEED, AttributeModifier.Operation.ADDITION, 0.1D);
 
     // 冲击：击退强度提升
-    public static final Affix IMPACT = register("impact", Attributes.ATTACK_KNOCKBACK, AttributeModifier.Operation.ADDITION, 0.1D);
+    public static final Affix IMPACT = register("impact", AffixCategory.WEAPON, Attributes.ATTACK_KNOCKBACK, AttributeModifier.Operation.ADDITION, 0.1D);
 
     // 幸运：幸运提升
-    public static final Affix FORTUNE = register("fortune", Attributes.LUCK, AttributeModifier.Operation.ADDITION, 1.0D);
+    public static final Affix FORTUNE = register("fortune", AffixCategory.GENERIC, Attributes.LUCK, AttributeModifier.Operation.ADDITION, 1.0D);
 
     // 吸血：按实际造成的伤害恢复生命，满血时转为伤害吸收
-    public static final Affix LIFESTEAL = registerEffect("lifesteal", Affix.Kind.LIFESTEAL, 0.10D);
+    public static final Affix LIFESTEAL = registerEffect("lifesteal", Affix.Kind.LIFESTEAL, AffixCategory.WEAPON, 0.10D);
 
     // 血怒：生命高于 1 点时消耗 1 点生命，增加本次近战伤害
-    public static final Affix BLOODRAGE = registerEffect("bloodrage", Affix.Kind.BLOODRAGE, 2.0D);
+    public static final Affix BLOODRAGE = registerEffect("bloodrage", Affix.Kind.BLOODRAGE, AffixCategory.WEAPON, 2.0D);
 
     // 经验修补：消耗经验点修复装备耐久
-    public static final Affix EXPERIENCE_MENDING = registerEffect("experience_mending", Affix.Kind.EXPERIENCE_MENDING, 2.0D);
+    public static final Affix EXPERIENCE_MENDING = registerEffect("experience_mending", Affix.Kind.EXPERIENCE_MENDING, AffixCategory.GENERIC, 2.0D);
 
     // 永恒：耐久始终保持满值
-    public static final Affix ETERNAL = registerEffect("eternal", Affix.Kind.ETERNAL, 0.0D);
+    public static final Affix ETERNAL = registerEffect("eternal", Affix.Kind.ETERNAL, AffixCategory.TOOL, 0.0D);
 
     // 破军：提升原版暴击后的伤害
-    public static final Affix BREAK_ARMY = registerEffect("break_army", Affix.Kind.BREAK_ARMY, 1.0D);
+    public static final Affix BREAK_ARMY = registerEffect("break_army", Affix.Kind.BREAK_ARMY, AffixCategory.WEAPON, 1.0D);
 
     // 不朽：死亡时保留 1 点生命，基础数值为冷却减免秒数
-    public static final Affix IMMORTAL = registerEffect("immortal", Affix.Kind.IMMORTAL, 1.0D);
+    public static final Affix IMMORTAL = registerEffect("immortal", Affix.Kind.IMMORTAL, AffixCategory.ARMOR, 1.0D);
 
     // 闪避：手持与穿戴装备的概率直接叠加
-    public static final Affix DODGE = registerEffect("dodge", Affix.Kind.DODGE, 0.10D);
+    public static final Affix DODGE = registerEffect("dodge", Affix.Kind.DODGE, AffixCategory.GENERIC, 0.10D);
 
     private Affixes() {
     }
 
-    private static Affix register(String path, Attribute attribute,
+    private static Affix register(String path, AffixCategory category, Attribute attribute,
                                   AttributeModifier.Operation operation, double defaultBaseValue) {
-        return put(new Affix(path, attribute, operation, defaultBaseValue));
+        return put(new Affix(path, category, attribute, operation, defaultBaseValue));
     }
 
-    private static Affix registerEffect(String path, Affix.Kind kind, double defaultBaseValue) {
-        return put(new Affix(path, kind, defaultBaseValue));
+    private static Affix registerEffect(String path, Affix.Kind kind, AffixCategory category,
+                                        double defaultBaseValue) {
+        return put(new Affix(path, kind, category, defaultBaseValue));
     }
 
     private static Affix put(Affix affix) {

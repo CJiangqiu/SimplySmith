@@ -5,7 +5,8 @@ import net.minecraft.world.item.ItemStack;
 
 import net.simplysmith.config.SimplySmithConfig;
 import net.simplysmith.smith.affix.Affix;
-import net.simplysmith.smith.affix.Affixes;
+import net.simplysmith.smith.affix.AffixCategory;
+import net.simplysmith.smith.affix.AffixRoller;
 import net.simplysmith.smith.quality.Quality;
 
 import java.util.ArrayList;
@@ -64,36 +65,25 @@ public final class SmithingRecipes {
 
         Quality upgraded = quality.next();
         SmithData.setQuality(result, upgraded);
-        SmithData.setAffixes(result, expandAffixes(SmithData.affixes(gear), upgraded, random));
+        SmithData.setAffixes(result, expandAffixes(gear, SmithData.affixes(gear), upgraded, random));
         return result;
     }
 
     /*
     突破后补充词条：补到新品质的词条数量上限
 
-    差额 = 新品质上限 - 当前词条数。补充时沿用「优先不放回」的规则，
-    已有的词条不会被重复抽到；池子不够时才允许重复。
+    差额 = 新品质上限 - 当前词条数。补充与首次盖章走同一套抽取逻辑，
+    同样按装备分类偏向、同样优先不放回，已有的词条不会被重复抽到。
     */
-    private static List<Affix> expandAffixes(List<Affix> current, Quality upgraded, RandomSource random) {
+    private static List<Affix> expandAffixes(ItemStack gear, List<Affix> current,
+                                             Quality upgraded, RandomSource random) {
         int target = SimplySmithConfig.get().affixMax(upgraded);
         List<Affix> result = new ArrayList<>(current);
         if (result.size() >= target) {
             return result;
         }
 
-        List<Affix> pool = new ArrayList<>(Affixes.all());
-        pool.removeAll(result);
-
-        while (result.size() < target) {
-            if (pool.isEmpty()) {
-                // 池子抽干，重新装填以兜底重复
-                pool.addAll(Affixes.all());
-                if (pool.isEmpty()) {
-                    break;
-                }
-            }
-            result.add(pool.remove(random.nextInt(pool.size())));
-        }
+        result.addAll(AffixRoller.draw(AffixCategory.of(gear), target - result.size(), current, random));
         return result;
     }
 }
